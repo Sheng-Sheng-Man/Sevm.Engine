@@ -5,7 +5,7 @@
   },
   "projects": {
     "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\Sevm.Engine.csproj": {
-      "version": "1.0.2208.11",
+      "version": "1.0.2208.12",
       "restore": {
         "projectUniqueName": "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\Sevm.Engine.csproj",
         "projectName": "Sevm.Engine",
@@ -42,7 +42,7 @@
           "dependencies": {
             "Sevm.Sir": {
               "target": "Package",
-              "version": "[1.0.2208.7, )"
+              "version": "[1.0.2208.8, )"
             }
           },
           "imports": [

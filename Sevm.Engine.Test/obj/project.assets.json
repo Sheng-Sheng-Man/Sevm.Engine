@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     "net6.0": {
-      "Sevm.Sir/1.0.2208.7": {
+      "Sevm.Sir/1.0.2208.8": {
         "type": "package",
         "compile": {
           "lib/netstandard2.1/Sevm.Sir.dll": {
@@ -22,11 +22,11 @@
           }
         }
       },
-      "Sevm.Engine/1.0.2208.11": {
+      "Sevm.Engine/1.0.2208.12": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.1",
         "dependencies": {
-          "Sevm.Sir": "1.0.2208.7"
+          "Sevm.Sir": "1.0.2208.8"
         },
         "compile": {
           "bin/placeholder/Sevm.Engine.dll": {}
@@ -38,10 +38,10 @@
     }
   },
   "libraries": {
-    "Sevm.Sir/1.0.2208.7": {
-      "sha512": "59AmkReaNhjpoZmC4LC8dbxfih3Puq5+uZMvR2kyfhVFuAVtZgDFzxUhWIEbMHMEiBPnoelLscU9Xv+kqokUCA==",
+    "Sevm.Sir/1.0.2208.8": {
+      "sha512": "I56kTAOI888Qnagr//r4RTjHq4olpUsUNWoaqX/gA+i7JmZvL28yRiudpbJ/H2S77CnZNAn9RTj1V0X+cO3PYw==",
       "type": "package",
-      "path": "sevm.sir/1.0.2208.7",
+      "path": "sevm.sir/1.0.2208.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -51,11 +51,11 @@
         "lib/netstandard2.1/Sevm.Sir.dll",
         "lib/netstandard2.1/Sevm.Sir.xml",
         "script.png",
-        "sevm.sir.1.0.2208.7.nupkg.sha512",
+        "sevm.sir.1.0.2208.8.nupkg.sha512",
         "sevm.sir.nuspec"
       ]
     },
-    "Sevm.Engine/1.0.2208.11": {
+    "Sevm.Engine/1.0.2208.12": {
       "type": "project",
       "path": "../Sevm.Engine/Sevm.Engine.csproj",
       "msbuildProject": "../Sevm.Engine/Sevm.Engine.csproj"
@@ -63,7 +63,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Sevm.Engine >= 1.0.2208.11"
+      "Sevm.Engine >= 1.0.2208.12"
     ]
   },
   "packageFolders": {

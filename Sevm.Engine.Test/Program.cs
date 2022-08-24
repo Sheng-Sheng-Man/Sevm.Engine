@@ -19,7 +19,7 @@ namespace Sevm.Engine.Test {
                             ls.Add(buffer[i]);
                         }
                     } while (len > 0);
-                    using (var script = Parser.GetScript(ls.ToArray())) {
+                    using (var script = Parser.GetScript(System.Text.Encoding.UTF8.GetString(ls.ToArray()))) {
                         Console.WriteLine("[SIR]");
                         Console.WriteLine(script.ToString());
                         Console.WriteLine("[EXECUTE]");

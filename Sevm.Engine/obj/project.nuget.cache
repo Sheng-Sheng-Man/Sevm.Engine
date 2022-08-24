@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "3v5Xf8Zf2CdO2BmVazvDPFvvsPBEW52LeGC2yKdMn8CbfytOqtdxl3wP3R8X+NgUig2IqhRy5lZWwR14JQuXaw==",
+  "dgSpecHash": "D7WaodACwNAUPqElrRY4RpWIJ91zA5JCS5ars1LPhCSNFdkdMRvzqKF8DdlGjMi6GbtsUJbTD6BFtk1ShIZZag==",
   "success": true,
   "projectFilePath": "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\Sevm.Engine.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\inmou\\.nuget\\packages\\sevm.sir\\1.0.2208.7\\sevm.sir.1.0.2208.7.nupkg.sha512"
+    "C:\\Users\\inmou\\.nuget\\packages\\sevm.sir\\1.0.2208.8\\sevm.sir.1.0.2208.8.nupkg.sha512"
   ],
   "logs": []
 }

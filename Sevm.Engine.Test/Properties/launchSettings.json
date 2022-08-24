@@ -2,7 +2,7 @@
   "profiles": {
     "Sevm.Engine.Test": {
       "commandName": "Project",
-      "commandLineArgs": "\"X:\\Projects.Svn\\Egg\\ShengShengMan\\Script\\圆的面积.ssm.sbc\""
+      "commandLineArgs": "\"X:\\Projects.Svn\\Egg\\ShengShengMan\\Script\\圆的面积.ssm.sc\""
     }
   }
 }

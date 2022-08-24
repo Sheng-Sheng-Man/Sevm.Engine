@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Sevm.Engine</id>
+    <version>1.0.2208.12</version>
+    <authors>Sevm.Engine</authors>
+    <icon>script.png</icon>
+    <readme>README.md</readme>
+    <description>使用SIR中间语言的脚本执行虚拟机</description>
+    <dependencies>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="Sevm.Sir" version="1.0.2208.8" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\bin\Release\netstandard2.1\Sevm.Engine.dll" target="lib\netstandard2.1\Sevm.Engine.dll" />
+    <file src="X:\Projects.GitHub\inmount\SEVM\README.md" target="\README.md" />
+    <file src="X:\Projects.GitHub\inmount\SEVM\script.png" target="\script.png" />
+  </files>
+</package>
