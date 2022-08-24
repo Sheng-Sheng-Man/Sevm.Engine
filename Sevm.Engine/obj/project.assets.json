@@ -1,0 +1,115 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETStandard,Version=v2.1": {
+      "Sevm.Sir/1.0.2208.7": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/Sevm.Sir.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/Sevm.Sir.dll": {
+            "related": ".xml"
+          }
+        },
+        "contentFiles": {
+          "contentFiles/any/netstandard2.1/script.ico": {
+            "buildAction": "Content",
+            "codeLanguage": "any",
+            "copyToOutput": false
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Sevm.Sir/1.0.2208.7": {
+      "sha512": "59AmkReaNhjpoZmC4LC8dbxfih3Puq5+uZMvR2kyfhVFuAVtZgDFzxUhWIEbMHMEiBPnoelLscU9Xv+kqokUCA==",
+      "type": "package",
+      "path": "sevm.sir/1.0.2208.7",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "content/script.ico",
+        "contentFiles/any/netstandard2.1/script.ico",
+        "lib/netstandard2.1/Sevm.Sir.dll",
+        "lib/netstandard2.1/Sevm.Sir.xml",
+        "script.png",
+        "sevm.sir.1.0.2208.7.nupkg.sha512",
+        "sevm.sir.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETStandard,Version=v2.1": [
+      "Sevm.Sir >= 1.0.2208.7"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\inmou\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.2208.11",
+    "restore": {
+      "projectUniqueName": "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\Sevm.Engine.csproj",
+      "projectName": "Sevm.Engine",
+      "projectPath": "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\Sevm.Engine.csproj",
+      "packagesPath": "C:\\Users\\inmou\\.nuget\\packages\\",
+      "outputPath": "X:\\Projects.GitHub\\inmount\\SEVM\\Sevm.Engine\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\inmou\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netstandard2.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netstandard2.1": {
+        "targetAlias": "netstandard2.1",
+        "dependencies": {
+          "Sevm.Sir": {
+            "target": "Package",
+            "version": "[1.0.2208.7, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "NETStandard.Library": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

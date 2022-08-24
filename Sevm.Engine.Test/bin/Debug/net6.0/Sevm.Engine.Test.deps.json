@@ -1,0 +1,54 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "Sevm.Engine.Test/1.0.0": {
+        "dependencies": {
+          "Sevm.Engine": "1.0.2208.11"
+        },
+        "runtime": {
+          "Sevm.Engine.Test.dll": {}
+        }
+      },
+      "Sevm.Sir/1.0.2208.7": {
+        "runtime": {
+          "lib/netstandard2.1/Sevm.Sir.dll": {
+            "assemblyVersion": "1.0.2208.7",
+            "fileVersion": "1.0.2208.7"
+          }
+        }
+      },
+      "Sevm.Engine/1.0.2208.11": {
+        "dependencies": {
+          "Sevm.Sir": "1.0.2208.7"
+        },
+        "runtime": {
+          "Sevm.Engine.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Sevm.Engine.Test/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Sevm.Sir/1.0.2208.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-59AmkReaNhjpoZmC4LC8dbxfih3Puq5+uZMvR2kyfhVFuAVtZgDFzxUhWIEbMHMEiBPnoelLscU9Xv+kqokUCA==",
+      "path": "sevm.sir/1.0.2208.7",
+      "hashPath": "sevm.sir.1.0.2208.7.nupkg.sha512"
+    },
+    "Sevm.Engine/1.0.2208.11": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

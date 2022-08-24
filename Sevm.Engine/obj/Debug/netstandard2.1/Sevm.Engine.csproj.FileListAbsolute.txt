@@ -1,0 +1,10 @@
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\bin\Debug\netstandard2.1\Sevm.Engine.deps.json
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\bin\Debug\netstandard2.1\Sevm.Engine.dll
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\bin\Debug\netstandard2.1\Sevm.Engine.pdb
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.csproj.AssemblyReference.cache
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.GeneratedMSBuildEditorConfig.editorconfig
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.AssemblyInfoInputs.cache
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.AssemblyInfo.cs
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.csproj.CoreCompileInputs.cache
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.dll
+X:\Projects.GitHub\inmount\SEVM\Sevm.Engine\obj\Debug\netstandard2.1\Sevm.Engine.pdb
