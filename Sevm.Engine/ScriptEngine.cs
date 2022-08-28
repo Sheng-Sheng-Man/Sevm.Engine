@@ -226,155 +226,211 @@ namespace Sevm {
                         line++; break;
                     // 二、数据指令
                     case SirCodeInstructionTypes.Mov:
-                        SetValue(code.Target, GetValue(code.Source));
+                        SetValue(code.Exp1, GetValue(code.Exp2));
                         line++; break;
                     case SirCodeInstructionTypes.New:
-                        if (code.Target.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Target.Type.ToString()}'");
-                        if (code.Source.Type != SirExpressionTypes.None) {
+                        if (code.Exp1.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        if (code.Exp2.Type != SirExpressionTypes.None) {
                             // 新建变量并指定地址
-                            this.Variables[code.Target.Content] = new Define("", GetValue(code.Source));
+                            this.Variables[code.Exp1.Content] = new Define("", GetValue(code.Exp2));
                         } else {
                             // 新建虚拟内存块
                             int ptr = this.Memories.Count;
                             this.Memories[ptr] = Engine.Memory.Value.None;
                             // 新建变量
-                            this.Variables[code.Target.Content] = new Define("", ptr);
+                            this.Variables[code.Exp1.Content] = new Define("", ptr);
                         }
                         line++; break;
                     case SirCodeInstructionTypes.Ptr:
-                        if (code.Target.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Target.Type.ToString()}'");
-                        switch (this.Storages[0]) {
-                            case 0: // 处理变量指针
-                                this.Variables[code.Target.Content].IntPtr = GetValue(code.Source);
-                                break;
-                            case 0x01: // 处理列表指针
-                                Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Target.Content].IntPtr];
-                                // 动态添加列表项
-                                int ptrListIndex = this.Storages[1];
-                                if (ptrList.Values.Count <= ptrListIndex) {
-                                    for (int i = ptrList.Values.Count; i <= ptrListIndex; i++) {
-                                        ptrList.Values.Add(0);
-                                    }
-                                }
-                                ptrList.Values[ptrListIndex] = GetValue(code.Source);
-                                break;
-                            case 0x11: // 处理对象键集合指针
-                                Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Target.Content].IntPtr];
-                                ptrObj.Keys = GetValue(code.Source).ToInteger();
-                                break;
-                            case 0x12: // 处理对象值集合指针
-                                ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Target.Content].IntPtr];
-                                ptrObj.Values = GetValue(code.Source).ToInteger();
-                                break;
-                            default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
-                        }
+                        if (code.Exp1.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
+                        //switch (this.Storages[0]) {
+                        //    case 0: // 处理变量指针
+                        //        this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
+                        //        break;
+                        //    case 0x01: // 处理列表指针
+                        //        Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
+                        //        // 动态添加列表项
+                        //        int ptrListIndex = this.Storages[1];
+                        //        if (ptrList.Values.Count <= ptrListIndex) {
+                        //            for (int i = ptrList.Values.Count; i <= ptrListIndex; i++) {
+                        //                ptrList.Values.Add(0);
+                        //            }
+                        //        }
+                        //        ptrList.Values[ptrListIndex] = GetValue(code.Exp2);
+                        //        break;
+                        //    case 0x11: // 处理对象键集合指针
+                        //        Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
+                        //        ptrObj.Keys = GetValue(code.Exp2).ToInteger();
+                        //        break;
+                        //    case 0x12: // 处理对象值集合指针
+                        //        ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
+                        //        ptrObj.Values = GetValue(code.Exp2).ToInteger();
+                        //        break;
+                        //    default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
+                        //}
                         line++; break;
                     case SirCodeInstructionTypes.Lea:
-                        if (code.Source.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式类型'{code.Source.Type.ToString()}'");
-                        switch (this.Storages[0]) {
-                            case 0: // 处理变量指针
-                                SetValue(code.Target, this.Variables[code.Source.Content].IntPtr);
-                                break;
-                            case 0x01: // 处理列表指针
-                                Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Source.Content].IntPtr];
-                                SetValue(code.Target, ptrList.Values[this.Storages[1]]);
-                                break;
-                            case 0x11: // 处理对象键集合指针
-                                Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Source.Content].IntPtr];
-                                SetValue(code.Target, ptrObj.Keys);
-                                break;
-                            case 0x12: // 处理对象值集合指针
-                                ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Source.Content].IntPtr];
-                                SetValue(code.Target, ptrObj.Values);
-                                break;
-                            default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
-                        }
+                        if (code.Exp2.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式类型'{code.Exp2.Type.ToString()}'");
+                        SetValue(code.Exp1, this.Variables[code.Exp2.Content].IntPtr);
+                        //switch (this.Storages[0]) {
+                        //    case 0: // 处理变量指针
+
+                        //        break;
+                        //    case 0x01: // 处理列表指针
+                        //        Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
+                        //        SetValue(code.Exp1, ptrList.Values[this.Storages[1]]);
+                        //        break;
+                        //    case 0x11: // 处理对象键集合指针
+                        //        Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
+                        //        SetValue(code.Exp1, ptrObj.Keys);
+                        //        break;
+                        //    case 0x12: // 处理对象值集合指针
+                        //        ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
+                        //        SetValue(code.Exp1, ptrObj.Values);
+                        //        break;
+                        //    default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
+                        //}
                         line++; break;
                     case SirCodeInstructionTypes.Int:
-                        SetValue(code.Target, GetValue(code.Source).ToInteger());
+                        SetValue(code.Exp1, GetValue(code.Exp2).ToInteger());
                         line++; break;
                     case SirCodeInstructionTypes.Frac:
-                        SetValue(code.Target, GetValue(code.Source).ToDouble() - GetValue(code.Source).ToInteger());
+                        SetValue(code.Exp1, GetValue(code.Exp2).ToDouble() - GetValue(code.Exp2).ToInteger());
                         line++; break;
                     // 三、类型操作指令
                     case SirCodeInstructionTypes.List:
-                        SetValue(code.Target, new Engine.Memory.List(this.Memories));
+                        SetValue(code.Exp1, new Engine.Memory.List(this.Memories));
+                        line++; break;
+                    case SirCodeInstructionTypes.Ptrl: // 设置列表内容指针
+                        Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
+                        // 动态添加列表项
+                        int ptrListIndex = GetValue(code.Exp2);
+                        int ptrListValue = GetValue(code.Exp3);
+                        // 判断赋值的指针是否大于0
+                        if (ptrListValue > 0) {
+                            // 设置值
+                            if (ptrList.Values.Count <= ptrListIndex) {
+                                for (int i = ptrList.Values.Count; i <= ptrListIndex; i++) {
+                                    ptrList.Values.Add(0);
+                                }
+                            }
+                            ptrList.Values[ptrListIndex] = ptrListValue;
+                        } else {
+                            // 清理列表
+                            for (int i = ptrList.Values.Count - 1; i >= ptrListIndex; i--) {
+                                ptrList.Values.RemoveAt(i);
+                            }
+                        }
+                        line++; break;
+                    case SirCodeInstructionTypes.Leal: // 获取列表内容指针
+                        ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
+                        SetValue(code.Exp1, ptrList.Values[GetValue(code.Exp3)]);
+                        line++; break;
+                    case SirCodeInstructionTypes.Idx: // 获取内容匹配索引
+                        ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
+                        // 动态添加列表项
+                        int idx = -1;
+                        string str = GetValue(code.Exp3);
+                        // 遍历列表
+                        for (int i = 0; i < ptrList.Count; i++) {
+                            string lsStr = this.Memories[ptrList.Values[i]].ToString();
+                            if (str == lsStr) {
+                                idx = i;
+                                break;
+                            }
+                        }
+                        // 赋值内容
+                        SetValue(code.Exp1, idx);
                         line++; break;
                     case SirCodeInstructionTypes.Join:
-                        Engine.Memory.List list = (Engine.Memory.List)GetValue(code.Source);
+                        Engine.Memory.List list = (Engine.Memory.List)GetValue(code.Exp2);
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < list.Values.Count; i++) {
                             sb.Append(this.Memories[list.Values[i]].ToString());
                         }
-                        SetValue(code.Target, sb.ToString());
+                        SetValue(code.Exp1, sb.ToString());
                         line++; break;
                     case SirCodeInstructionTypes.Cnt:
-                        SetValue(code.Target, GetValue(code.Source).GetSize());
+                        SetValue(code.Exp1, GetValue(code.Exp2).GetSize());
                         line++; break;
                     case SirCodeInstructionTypes.Obj:
                         Engine.Memory.Object obj = new Engine.Memory.Object(this.Memories);
-                        SetValue(code.Target, obj);
+                        SetValue(code.Exp1, obj);
                         obj.Keys = this.Memories.Count;
                         this.Memories[obj.Keys] = new Engine.Memory.List(this.Memories);
                         obj.Values = this.Memories.Count;
                         this.Memories[obj.Values] = new Engine.Memory.List(this.Memories);
                         line++; break;
+                    case SirCodeInstructionTypes.Ptrk: // 设置对象键列表指针
+                        obj = (Engine.Memory.Object)GetValue(code.Exp1);
+                        obj.Keys = GetValue(code.Exp2);
+                        line++; break;
+                    case SirCodeInstructionTypes.Ptrv: // 设置对象值列表指针
+                        obj = (Engine.Memory.Object)GetValue(code.Exp1);
+                        obj.Values = GetValue(code.Exp2);
+                        line++; break;
+                    case SirCodeInstructionTypes.Leak: // 获取对象键列表指针
+                        obj = (Engine.Memory.Object)GetValue(code.Exp2);
+                        SetValue(code.Exp1, obj.Keys);
+                        line++; break;
+                    case SirCodeInstructionTypes.Leav: // 获取对象值列表指针
+                        obj = (Engine.Memory.Object)GetValue(code.Exp2);
+                        SetValue(code.Exp1, obj.Values);
+                        line++; break;
                     // 四、运算操作指令
                     case SirCodeInstructionTypes.Add:
-                        SetValue(code.Target, GetValue(code.Target).ToDouble() + GetValue(code.Source).ToDouble());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToDouble() + GetValue(code.Exp2).ToDouble());
                         line++; break;
                     case SirCodeInstructionTypes.Sub:
-                        SetValue(code.Target, GetValue(code.Target).ToDouble() - GetValue(code.Source).ToDouble());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToDouble() - GetValue(code.Exp2).ToDouble());
                         line++; break;
                     case SirCodeInstructionTypes.Mul:
-                        SetValue(code.Target, GetValue(code.Target).ToDouble() * GetValue(code.Source).ToDouble());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToDouble() * GetValue(code.Exp2).ToDouble());
                         line++; break;
                     case SirCodeInstructionTypes.Div:
-                        SetValue(code.Target, GetValue(code.Target).ToDouble() / GetValue(code.Source).ToDouble());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToDouble() / GetValue(code.Exp2).ToDouble());
                         line++; break;
                     // 五、逻辑操作指令
                     case SirCodeInstructionTypes.Not:
-                        SetValue(code.Target, GetValue(code.Target).ToInteger() > 0 ? 0 : 1);
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToInteger() > 0 ? 0 : 1);
                         line++; break;
                     case SirCodeInstructionTypes.And:
-                        SetValue(code.Target, GetValue(code.Target).ToInteger() & GetValue(code.Source).ToInteger());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToInteger() & GetValue(code.Exp2).ToInteger());
                         line++; break;
                     case SirCodeInstructionTypes.Or:
-                        SetValue(code.Target, GetValue(code.Target).ToInteger() | GetValue(code.Source).ToInteger());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToInteger() | GetValue(code.Exp2).ToInteger());
                         line++; break;
                     case SirCodeInstructionTypes.Xor:
-                        SetValue(code.Target, GetValue(code.Target).ToInteger() ^ GetValue(code.Source).ToInteger());
+                        SetValue(code.Exp1, GetValue(code.Exp1).ToInteger() ^ GetValue(code.Exp2).ToInteger());
                         line++; break;
                     // 六、比较指令
                     case SirCodeInstructionTypes.Equal:
-                        this.Storages[0] = Equal(code.Target, code.Source);
+                        SetValue(code.Exp1, Equal(code.Exp2, code.Exp3));
                         line++; break;
                     case SirCodeInstructionTypes.Large:
-                        this.Storages[0] = GetValue(code.Target).ToDouble() > GetValue(code.Source).ToDouble() ? 1 : 0;
+                        SetValue(code.Exp1, GetValue(code.Exp2).ToDouble() > GetValue(code.Exp3).ToDouble() ? 1 : 0);
                         line++; break;
                     case SirCodeInstructionTypes.Small:
-                        this.Storages[0] = GetValue(code.Target).ToDouble() < GetValue(code.Source).ToDouble() ? 1 : 0;
+                        SetValue(code.Exp1, GetValue(code.Exp2).ToDouble() < GetValue(code.Exp3).ToDouble() ? 1 : 0);
                         line++; break;
                     // 七、区域操作指令
                     case SirCodeInstructionTypes.Jmp:
-                        if (code.Target.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Target.Type.ToString()}'");
-                        line = this.Labels[code.Target.Content].IntPtr;
+                        if (code.Exp1.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        line = this.Labels[code.Exp1.Content].IntPtr;
                         break;
                     case SirCodeInstructionTypes.Jmpf:
-                        if (code.Target.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Target.Type.ToString()}'");
-                        if (this.Storages[0] > 0) {
-                            line = this.Labels[code.Target.Content].IntPtr;
-                        } else {
-                            if (code.Source.Type == SirExpressionTypes.None) break;
-                            if (code.Source.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Target.Type.ToString()}'");
-                            line = this.Labels[code.Source.Content].IntPtr;
+                        if (code.Exp2.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        if (GetValue(code.Exp1).ToDouble() > 0) {
+                            line = this.Labels[code.Exp2.Content].IntPtr;
+                            break;
                         }
-                        break;
+                        line++; break;
                     case SirCodeInstructionTypes.Call:
-                        if (code.Source.Type == SirExpressionTypes.Label) {
-                            SetValue(code.Target, GetValue(ExecuteFunc(code.Source.Content)));
+                        if (code.Exp2.Type == SirExpressionTypes.Label) {
+                            SetValue(code.Exp1, GetValue(ExecuteFunc(code.Exp2.Content)));
                         } else {
-                            string name = GetValue(code.Source);
+                            string name = GetValue(code.Exp2);
                             // 生成参数
                             Engine.Memory.List arg = (Engine.Memory.List)this.Memories[this.Storages[0]];
                             Params args = new Params();
@@ -384,7 +440,7 @@ namespace Sevm {
                             // 优先从注册的函数中执行
                             if (this.NativeFunctions.ContainsKey(name)) {
                                 // 执行并返回内容
-                                SetValue(code.Target, this.NativeFunctions[name](args));
+                                SetValue(code.Exp1, this.NativeFunctions[name](args));
                             } else {
                                 // 从第三方程序中查找函数并执行
                                 bool found = false;
@@ -397,7 +453,7 @@ namespace Sevm {
                                             using (var engine = new ScriptEngine(lib)) {
                                                 engine.OnExecuting += (object sender, ScrpitEventArgs e) => { this.OnExecuting(sender, e); };
                                                 engine.OnRegFunction += (object sender, ScrpitEventArgs e) => { this.OnRegFunction(sender, e); };
-                                                SetValue(code.Target, engine.Execute(funName, args));
+                                                SetValue(code.Exp1, engine.Execute(funName, args));
                                                 found = true;
                                                 break;
                                             }
@@ -409,7 +465,7 @@ namespace Sevm {
                             }
                         }
                         line++; break;
-                    case SirCodeInstructionTypes.Ret: return code.Target;
+                    case SirCodeInstructionTypes.Ret: return code.Exp1;
                     default: throw new Exception($"不支持的指令类型'{code.Instruction.ToString()}'");
                 }
             }
@@ -490,8 +546,8 @@ namespace Sevm {
             for (int i = 0; i < this.Script.Codes.Count; i++) {
                 var code = this.Script.Codes[i];
                 if (code.Instruction == SirCodeInstructionTypes.Label) {
-                    if (code.Target.Type == SirExpressionTypes.Label) {
-                        int labIndex = code.Target.Content;
+                    if (code.Exp1.Type == SirExpressionTypes.Label) {
+                        int labIndex = code.Exp1.Content;
                         if (this.Labels[labIndex] != null) {
                             this.Labels[labIndex].IntPtr = i;
                         } else {

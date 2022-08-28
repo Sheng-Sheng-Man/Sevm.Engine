@@ -13,9 +13,9 @@
     <SourceRoot Include="C:\Users\inmou\.nuget\packages\" />
   </ItemGroup>
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Content Include="$(NuGetPackageRoot)sevm.sir\1.0.2208.8\contentFiles\any\netstandard2.1\script.ico" Condition="Exists('$(NuGetPackageRoot)sevm.sir\1.0.2208.8\contentFiles\any\netstandard2.1\script.ico')">
+    <Content Include="$(NuGetPackageRoot)sevm.sir\1.0.2208.12\contentFiles\any\netstandard2.1\script.ico" Condition="Exists('$(NuGetPackageRoot)sevm.sir\1.0.2208.12\contentFiles\any\netstandard2.1\script.ico')">
       <NuGetPackageId>Sevm.Sir</NuGetPackageId>
-      <NuGetPackageVersion>1.0.2208.8</NuGetPackageVersion>
+      <NuGetPackageVersion>1.0.2208.12</NuGetPackageVersion>
       <NuGetItemType>Content</NuGetItemType>
       <Pack>false</Pack>
       <Private>False</Private>

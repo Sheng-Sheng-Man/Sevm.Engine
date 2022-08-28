@@ -42,7 +42,7 @@ namespace Sevm.Engine.Test {
                  */
 
                 // 添加引入
-                sir.Imports.Add(SirImportTypes.Use, "host");
+                sir.Imports.Add(SirImportTypes.Use, "控制台");
                 // 添加数据
                 sir.Datas.Add(1, "Hello World");
                 sir.Datas.Add(2, "print");
@@ -56,18 +56,10 @@ namespace Sevm.Engine.Test {
                 sir.Codes.Add(SirCodeInstructionTypes.New, SirExpression.Variable(2));
                 // list $2
                 sir.Codes.Add(SirCodeInstructionTypes.List, SirExpression.Variable(2));
-                // mov #0, 0
-                sir.Codes.Add(SirCodeInstructionTypes.Mov, SirExpression.Storage(0), SirExpression.Value(0));
                 // lea #2, $1
                 sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(2), SirExpression.Variable(1));
-                // mov #0, 1
-                sir.Codes.Add(SirCodeInstructionTypes.Mov, SirExpression.Storage(0), SirExpression.Value(1));
-                // mov #1, 0
-                sir.Codes.Add(SirCodeInstructionTypes.Mov, SirExpression.Storage(1), SirExpression.Value(0));
-                // ptr $2, #2
-                sir.Codes.Add(SirCodeInstructionTypes.Ptr, SirExpression.Variable(2), SirExpression.Storage(2));
-                // mov #0, 0
-                sir.Codes.Add(SirCodeInstructionTypes.Mov, SirExpression.Storage(0), SirExpression.Value(0));
+                // ptrl $2, 0, #2
+                sir.Codes.Add(SirCodeInstructionTypes.Ptrl, SirExpression.Variable(2),0, SirExpression.Storage(2));
                 // lea #0, $2
                 sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(0), SirExpression.Variable(2));
                 // call [0], [2]
@@ -85,7 +77,7 @@ namespace Sevm.Engine.Test {
         private static void Engine_OnRegFunction(object sender, Sevm.Engine.ScrpitEventArgs e) {
             Sevm.ScriptEngine engine = (Sevm.ScriptEngine)sender;
             switch (e.Func) {
-                case "host":
+                case "控制台":
                     engine.Reg("print", (Params args) => {
                         Console.Write(args[0].ToString());
                         return 0;
@@ -116,6 +108,11 @@ namespace Sevm.Engine.Test {
                     // 读取数字
                     engine.Reg("控制台读取数字", (Params args) => {
                         return double.Parse(Console.ReadLine());
+                    });
+                    break;
+                case "系统":
+                    engine.Reg("获取系统运行毫秒数", (Params args) => {
+                        return Environment.TickCount;
                     });
                     break;
             }

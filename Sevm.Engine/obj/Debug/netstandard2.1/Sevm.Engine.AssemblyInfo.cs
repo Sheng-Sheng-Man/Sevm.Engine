@@ -14,11 +14,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Sevm.Engine")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("使用SIR中间语言的脚本执行虚拟机")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.2208.12")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.2208.12")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.2208.19")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.2208.19")]
 [assembly: System.Reflection.AssemblyProductAttribute("Sevm.Engine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Sevm.Engine")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.2208.12")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.0.2208.19")]
 
 // 由 MSBuild WriteCodeFragment 类生成。
 
