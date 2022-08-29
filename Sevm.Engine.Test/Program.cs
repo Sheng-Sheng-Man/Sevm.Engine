@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+// "X:\Projects.Svn\Egg\ShengShengMan\ScriptExample\函数.ssm.sc"
 using Sevm.Engine;
 using Sevm.Sir;
 
@@ -47,23 +48,27 @@ namespace Sevm.Engine.Test {
                 sir.Datas.Add(1, "Hello World");
                 sir.Datas.Add(2, "print");
                 // 添加变量定义
-                sir.Defines.Add(1, "str", 1);
+                sir.Defines.Add(3, "str");
                 // 添加函数定义
                 sir.Funcs.Add(1, "main");
                 // @1
                 sir.Codes.Add(SirCodeInstructionTypes.Label, SirExpression.Label(1));
-                // new $2
-                sir.Codes.Add(SirCodeInstructionTypes.New, SirExpression.Variable(2));
-                // list $2
-                sir.Codes.Add(SirCodeInstructionTypes.List, SirExpression.Variable(2));
                 // lea #2, $1
                 sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(2), SirExpression.Variable(1));
-                // ptrl $2, 0, #2
-                sir.Codes.Add(SirCodeInstructionTypes.Ptrl, SirExpression.Variable(2),0, SirExpression.Storage(2));
-                // lea #0, $2
-                sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(0), SirExpression.Variable(2));
-                // call [0], [2]
-                sir.Codes.Add(SirCodeInstructionTypes.Call, SirExpression.IntPtr(0), SirExpression.IntPtr(2));
+                // ptr $3, #2
+                sir.Codes.Add(SirCodeInstructionTypes.Ptr, SirExpression.Variable(3), SirExpression.Storage(2));
+                // ptr $4
+                sir.Codes.Add(SirCodeInstructionTypes.Ptr, SirExpression.Variable(4));
+                // list $4
+                sir.Codes.Add(SirCodeInstructionTypes.List, SirExpression.Variable(4));
+                // lea #2, $3
+                sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(2), SirExpression.Variable(3));
+                // ptrl $4, 0, #2
+                sir.Codes.Add(SirCodeInstructionTypes.Ptrl, SirExpression.Variable(4), 0, SirExpression.Storage(2));
+                // lea #0, $4
+                sir.Codes.Add(SirCodeInstructionTypes.Lea, SirExpression.Storage(0), SirExpression.Variable(4));
+                // call [0], $2
+                sir.Codes.Add(SirCodeInstructionTypes.Call, SirExpression.IntPtr(0), SirExpression.Variable(2));
                 Console.WriteLine("[SIR]");
                 Console.WriteLine(sir.ToString());
                 Console.WriteLine("[EXECUTE]");

@@ -2,6 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
+/Properties/
 /[Dd]ebug/
 /[Rr]elease/
 /[Ll]ibrary/
@@ -103,3 +104,23 @@ Sevm.Engine/obj/project.nuget.cache
 Sevm.Engine/obj/Sevm.Engine.csproj.nuget.dgspec.json
 Sevm.Engine/obj/Sevm.Engine.csproj.nuget.g.props
 Sevm.Engine/obj/Sevm.Engine.csproj.nuget.g.targets
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Engine.dll
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Engine.Test.deps.json
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Engine.Test.dll
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Engine.Test.exe
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Engine.Test.runtimeconfig.json
+Sevm.Engine.Test/bin/Debug/net6.0/Sevm.Sir.dll
+Sevm.Engine.Test/obj/Debug/net6.0/apphost.exe
+Sevm.Engine.Test/obj/Debug/net6.0/ref/Sevm.Engine.Test.dll
+Sevm.Engine.Test/obj/Debug/net6.0/refint/Sevm.Engine.Test.dll
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.csproj.BuildWithSkipAnalyzers
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.csproj.CopyComplete
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.csproj.CoreCompileInputs.cache
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.csproj.FileListAbsolute.txt
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.dll
+Sevm.Engine.Test/obj/Debug/net6.0/Sevm.Engine.Test.genruntimeconfig.cache
+Sevm.Engine/bin/Debug/netstandard2.1/Sevm.Engine.deps.json
+Sevm.Engine/bin/Debug/netstandard2.1/Sevm.Engine.dll
+Sevm.Engine/obj/Debug/netstandard2.1/Sevm.Engine.csproj.CoreCompileInputs.cache
+Sevm.Engine/obj/Debug/netstandard2.1/Sevm.Engine.csproj.FileListAbsolute.txt
+Sevm.Engine/obj/Debug/netstandard2.1/Sevm.Engine.dll

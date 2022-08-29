@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Sevm.Engine;
+using Sevm.Engine.Memory;
 using Sevm.Sir;
 
 namespace Sevm {
@@ -95,7 +96,6 @@ namespace Sevm {
             this.NativeFunctions = new NativeFunctions();
             this.Libraries = new ScriptLibraries();
             this.Storages = new Storages();
-            this.Memories = new Memories();
             this.Variables = new Defines();
             this.Labels = new Defines();
         }
@@ -105,6 +105,7 @@ namespace Sevm {
         /// </summary>
         public ScriptEngine() {
             this.Script = new SirScript();
+            this.Memories = new Memories();
             this.init();
         }
 
@@ -113,6 +114,18 @@ namespace Sevm {
         /// </summary>
         public ScriptEngine(SirScript script) {
             this.Script = script;
+            this.Memories = new Memories();
+            this.init();
+        }
+
+        /// <summary>
+        /// 实例化一个脚本引擎
+        /// </summary>
+        /// <param name="script"></param>
+        /// <param name="memories"></param>
+        public ScriptEngine(SirScript script, Memories memories) {
+            this.Script = script;
+            this.Memories = memories;
             this.init();
         }
 
@@ -228,69 +241,30 @@ namespace Sevm {
                     case SirCodeInstructionTypes.Mov:
                         SetValue(code.Exp1, GetValue(code.Exp2));
                         line++; break;
-                    case SirCodeInstructionTypes.New:
+                    case SirCodeInstructionTypes.Ptr:
                         if (code.Exp1.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
                         if (code.Exp2.Type != SirExpressionTypes.None) {
-                            // 新建变量并指定地址
-                            this.Variables[code.Exp1.Content] = new Define("", GetValue(code.Exp2));
+                            // 新建变量或修改变量指针
+                            if (this.Variables[code.Exp1.Content] == null) {
+                                this.Variables[code.Exp1.Content] = new Define("", GetValue(code.Exp2));
+                            } else {
+                                this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
+                            }
                         } else {
                             // 新建虚拟内存块
                             int ptr = this.Memories.Count;
                             this.Memories[ptr] = Engine.Memory.Value.None;
-                            // 新建变量
-                            this.Variables[code.Exp1.Content] = new Define("", ptr);
+                            // 新建变量或修改变量指针
+                            if (this.Variables[code.Exp1.Content] == null) {
+                                this.Variables[code.Exp1.Content] = new Define("", ptr);
+                            } else {
+                                this.Variables[code.Exp1.Content].IntPtr = ptr;
+                            }
                         }
-                        line++; break;
-                    case SirCodeInstructionTypes.Ptr:
-                        if (code.Exp1.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
-                        this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
-                        //switch (this.Storages[0]) {
-                        //    case 0: // 处理变量指针
-                        //        this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
-                        //        break;
-                        //    case 0x01: // 处理列表指针
-                        //        Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
-                        //        // 动态添加列表项
-                        //        int ptrListIndex = this.Storages[1];
-                        //        if (ptrList.Values.Count <= ptrListIndex) {
-                        //            for (int i = ptrList.Values.Count; i <= ptrListIndex; i++) {
-                        //                ptrList.Values.Add(0);
-                        //            }
-                        //        }
-                        //        ptrList.Values[ptrListIndex] = GetValue(code.Exp2);
-                        //        break;
-                        //    case 0x11: // 处理对象键集合指针
-                        //        Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
-                        //        ptrObj.Keys = GetValue(code.Exp2).ToInteger();
-                        //        break;
-                        //    case 0x12: // 处理对象值集合指针
-                        //        ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp1.Content].IntPtr];
-                        //        ptrObj.Values = GetValue(code.Exp2).ToInteger();
-                        //        break;
-                        //    default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
-                        //}
                         line++; break;
                     case SirCodeInstructionTypes.Lea:
                         if (code.Exp2.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式类型'{code.Exp2.Type.ToString()}'");
                         SetValue(code.Exp1, this.Variables[code.Exp2.Content].IntPtr);
-                        //switch (this.Storages[0]) {
-                        //    case 0: // 处理变量指针
-
-                        //        break;
-                        //    case 0x01: // 处理列表指针
-                        //        Engine.Memory.List ptrList = (Engine.Memory.List)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
-                        //        SetValue(code.Exp1, ptrList.Values[this.Storages[1]]);
-                        //        break;
-                        //    case 0x11: // 处理对象键集合指针
-                        //        Engine.Memory.Object ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
-                        //        SetValue(code.Exp1, ptrObj.Keys);
-                        //        break;
-                        //    case 0x12: // 处理对象值集合指针
-                        //        ptrObj = (Engine.Memory.Object)this.Memories[this.Variables[code.Exp2.Content].IntPtr];
-                        //        SetValue(code.Exp1, ptrObj.Values);
-                        //        break;
-                        //    default: throw new Exception($"不支持的处理类型'{this.Storages[0]}'");
-                        //}
                         line++; break;
                     case SirCodeInstructionTypes.Int:
                         SetValue(code.Exp1, GetValue(code.Exp2).ToInteger());
@@ -450,10 +424,10 @@ namespace Sevm {
                                         string funName = lib.Funcs[j].Name;
                                         if (funName == name) {
                                             // 执行并返回内容
-                                            using (var engine = new ScriptEngine(lib)) {
+                                            using (var engine = new ScriptEngine(lib, this.Memories)) {
                                                 engine.OnExecuting += (object sender, ScrpitEventArgs e) => { this.OnExecuting(sender, e); };
                                                 engine.OnRegFunction += (object sender, ScrpitEventArgs e) => { this.OnRegFunction(sender, e); };
-                                                SetValue(code.Exp1, engine.Execute(funName, args));
+                                                SetValue(code.Exp1, engine.Execute(funName, args, false));
                                                 found = true;
                                                 break;
                                             }
@@ -476,15 +450,22 @@ namespace Sevm {
         /// 执行函数
         /// </summary>
         /// <param name="func"></param>
+        /// <param name="args"></param>
+        /// <param name="clearMemories"></param>
         /// <returns></returns>
-        public Engine.Memory.Value Execute(string func, Params args) {
+        /// <exception cref="Exception"></exception>
+        public Engine.Memory.Value Execute(string func, Params args, bool clearMemories) {
             // 初始化
             this.NativeFunctions.Clear();
             this.Libraries.Clear();
             this.Storages.Clear();
-            this.Memories.Clear();
             this.Variables.Clear();
             this.Labels.Clear();
+            // 初始化存储空间
+            if (clearMemories) {
+                this.Memories.Clear();
+                this.Memories.Add(Value.None);
+            }
             // 加载函数集
             for (int i = 0; i < this.Script.Imports.Count; i++) {
                 var import = this.Script.Imports[i];
@@ -522,13 +503,25 @@ namespace Sevm {
                 var data = this.Script.Datas[i];
                 switch (data.DataType) {
                     case SirDataTypes.None:
-                        this.Memories[data.IntPtr] = Engine.Memory.Value.None;
+                        // 添加空数据
+                        int idxData = this.Memories.Count;
+                        this.Memories.Add(Engine.Memory.Value.None);
+                        this.Variables[data.Index] = new Define("", idxData);
+                        //this.Memories[data.IntPtr] = Engine.Memory.Value.None;
                         break;
                     case SirDataTypes.Number:
-                        this.Memories[data.IntPtr] = data.GetNumber();
+                        // 添加数值
+                        idxData = this.Memories.Count;
+                        this.Memories.Add(data.GetNumber());
+                        this.Variables[data.Index] = new Define("", idxData);
+                        //this.Memories[data.IntPtr] = data.GetNumber();
                         break;
                     case SirDataTypes.String:
-                        this.Memories[data.IntPtr] = data.GetString();
+                        // 添加数值
+                        idxData = this.Memories.Count;
+                        this.Memories.Add(data.GetString());
+                        this.Variables[data.Index] = new Define("", idxData);
+                        //this.Memories[data.IntPtr] = data.GetString();
                         break;
                     default: throw new Exception($"不支持的数据类型'{data.DataType.ToString()}'");
                 }
@@ -536,7 +529,7 @@ namespace Sevm {
             // 填充变量
             for (int i = 0; i < this.Script.Defines.Count; i++) {
                 var def = this.Script.Defines[i];
-                this.Variables[def.Index] = new Define(def.Name, def.IntPtr);
+                this.Variables[def.Index] = new Define(def.Name, 0);
             }
             // 填充标签
             for (int i = 0; i < this.Script.Funcs.Count; i++) {
@@ -579,7 +572,7 @@ namespace Sevm {
         /// </summary>
         /// <returns></returns>
         public Engine.Memory.Value Execute() {
-            return Execute("main", new Params());
+            return Execute("main", new Params(), true);
         }
 
         /// <summary>
