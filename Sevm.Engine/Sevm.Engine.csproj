@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>disable</Nullable>
+    <PackageIcon>script.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Version>1.0.2208.20</Version>
+    <Description>使用SIR中间语言的脚本执行虚拟机</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\script.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sevm.Sir" Version="1.0.2208.15" />
+  </ItemGroup>
+
+</Project>
