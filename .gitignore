@@ -2,6 +2,8 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
+/[Dd]ebug/
+/[Rr]elease/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -58,3 +60,23 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Sevm.Sir.Test/obj/Debug/net6.0/Sevm.Sir.Test.assets.cache
+Sevm.Sir.Test/obj/Debug/net6.0/Sevm.Sir.Test.csproj.AssemblyReference.cache
+Sevm.Sir.Test/obj/project.assets.json
+Sevm.Sir.Test/obj/project.nuget.cache
+Sevm.Sir.Test/obj/Sevm.Sir.Test.csproj.nuget.dgspec.json
+Sevm.Sir.Test/obj/Sevm.Sir.Test.csproj.nuget.g.props
+Sevm.Sir.Test/obj/Sevm.Sir.Test.csproj.nuget.g.targets
+Sevm.Sir/bin/Debug/netstandard2.1/Sevm.Sir.deps.json
+Sevm.Sir/bin/Debug/netstandard2.1/Sevm.Sir.dll
+Sevm.Sir/bin/Debug/netstandard2.1/Sevm.Sir.xml
+Sevm.Sir/obj/Debug/netstandard2.1/Sevm.Sir.assets.cache
+Sevm.Sir/obj/Debug/netstandard2.1/Sevm.Sir.csproj.CoreCompileInputs.cache
+Sevm.Sir/obj/Debug/netstandard2.1/Sevm.Sir.csproj.FileListAbsolute.txt
+Sevm.Sir/obj/Debug/netstandard2.1/Sevm.Sir.dll
+Sevm.Sir/obj/Debug/netstandard2.1/Sevm.Sir.xml
+Sevm.Sir/obj/project.assets.json
+Sevm.Sir/obj/project.nuget.cache
+Sevm.Sir/obj/Sevm.Sir.csproj.nuget.dgspec.json
+Sevm.Sir/obj/Sevm.Sir.csproj.nuget.g.props
+Sevm.Sir/obj/Sevm.Sir.csproj.nuget.g.targets
