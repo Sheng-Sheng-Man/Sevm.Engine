@@ -12,6 +12,11 @@ namespace Sevm.Engine {
         /// <summary>
         /// 获取或设置名称
         /// </summary>
+        public Sir.SirScopeTypes ScopeType { get; set; }
+
+        /// <summary>
+        /// 获取或设置名称
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>
@@ -24,7 +29,8 @@ namespace Sevm.Engine {
         /// </summary>
         /// <param name="name"></param>
         /// <param name="ptr"></param>
-        public Define(string name, int ptr) {
+        public Define(Sir.SirScopeTypes scope, string name, int ptr) {
+            this.ScopeType = scope;
             Name = name;
             IntPtr = ptr;
         }
@@ -33,6 +39,7 @@ namespace Sevm.Engine {
         /// 对象实例化
         /// </summary>
         public Define() {
+            this.ScopeType = Sir.SirScopeTypes.Private;
             Name = "";
             IntPtr = 0;
         }

@@ -50,7 +50,7 @@ namespace Sevm.Engine.Test {
                 // 添加变量定义
                 sir.Defines.Add(3, "str");
                 // 添加函数定义
-                sir.Funcs.Add(1, "main");
+                sir.Funcs.Add(SirScopeTypes.Public, 1, "main");
                 // @1
                 sir.Codes.Add(SirCodeInstructionTypes.Label, SirExpression.Label(1));
                 // lea #2, $1

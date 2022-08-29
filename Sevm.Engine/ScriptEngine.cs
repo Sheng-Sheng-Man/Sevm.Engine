@@ -88,6 +88,44 @@ namespace Sevm {
         /// </summary>
         public Defines Labels { get; private set; }
 
+        /// <summary>
+        /// 获取公共变量值
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Value GetPublicVariable(string name) {
+            for (int i = 0; i < this.Variables.Count; i++) {
+                var def = this.Variables[i];
+                if (def.ScopeType == SirScopeTypes.Public) {
+                    if (def.Name == name) return this.Memories[def.IntPtr];
+                }
+            }
+            return Value.None;
+        }
+
+        /// <summary>
+        /// 设置公共变量值
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetPublicVariable(string name, Value value) {
+            for (int i = 0; i < this.Variables.Count; i++) {
+                var def = this.Variables[i];
+                if (def.ScopeType == SirScopeTypes.Public) {
+                    if (def.Name == name) {
+                        if (def.IntPtr > 0) {
+                            this.Memories[def.IntPtr] = value;
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         // 初始化
         private void init() {
             this.OnExecuting += (object sender, ScrpitEventArgs e) => { };
@@ -130,11 +168,14 @@ namespace Sevm {
         }
 
         // 获取标签定义行
-        private int GetLabelIndex(string Name) {
+        private int GetPublicLabelIndex(string Name) {
             for (int i = 0; i < Labels.Count; i++) {
-                if (Labels[i] != null) {
-                    if (Labels[i].Name == Name) {
-                        return i;
+                var lab = Labels[i];
+                if (lab != null) {
+                    if (lab.ScopeType == SirScopeTypes.Public) {
+                        if (lab.Name == Name) {
+                            return i;
+                        }
                     }
                 }
             }
@@ -246,7 +287,7 @@ namespace Sevm {
                         if (code.Exp2.Type != SirExpressionTypes.None) {
                             // 新建变量或修改变量指针
                             if (this.Variables[code.Exp1.Content] == null) {
-                                this.Variables[code.Exp1.Content] = new Define("", GetValue(code.Exp2));
+                                this.Variables[code.Exp1.Content] = new Define(SirScopeTypes.Private, "", GetValue(code.Exp2));
                             } else {
                                 this.Variables[code.Exp1.Content].IntPtr = GetValue(code.Exp2);
                             }
@@ -256,7 +297,7 @@ namespace Sevm {
                             this.Memories[ptr] = Engine.Memory.Value.None;
                             // 新建变量或修改变量指针
                             if (this.Variables[code.Exp1.Content] == null) {
-                                this.Variables[code.Exp1.Content] = new Define("", ptr);
+                                this.Variables[code.Exp1.Content] = new Define(SirScopeTypes.Private, "", ptr);
                             } else {
                                 this.Variables[code.Exp1.Content].IntPtr = ptr;
                             }
@@ -506,21 +547,21 @@ namespace Sevm {
                         // 添加空数据
                         int idxData = this.Memories.Count;
                         this.Memories.Add(Engine.Memory.Value.None);
-                        this.Variables[data.Index] = new Define("", idxData);
+                        this.Variables[data.Index] = new Define(SirScopeTypes.Private, "", idxData);
                         //this.Memories[data.IntPtr] = Engine.Memory.Value.None;
                         break;
                     case SirDataTypes.Number:
                         // 添加数值
                         idxData = this.Memories.Count;
                         this.Memories.Add(data.GetNumber());
-                        this.Variables[data.Index] = new Define("", idxData);
+                        this.Variables[data.Index] = new Define(SirScopeTypes.Private, "", idxData);
                         //this.Memories[data.IntPtr] = data.GetNumber();
                         break;
                     case SirDataTypes.String:
                         // 添加数值
                         idxData = this.Memories.Count;
                         this.Memories.Add(data.GetString());
-                        this.Variables[data.Index] = new Define("", idxData);
+                        this.Variables[data.Index] = new Define(SirScopeTypes.Private, "", idxData);
                         //this.Memories[data.IntPtr] = data.GetString();
                         break;
                     default: throw new Exception($"不支持的数据类型'{data.DataType.ToString()}'");
@@ -529,12 +570,12 @@ namespace Sevm {
             // 填充变量
             for (int i = 0; i < this.Script.Defines.Count; i++) {
                 var def = this.Script.Defines[i];
-                this.Variables[def.Index] = new Define(def.Name, 0);
+                this.Variables[def.Index] = new Define(def.Scope, def.Name, 0);
             }
             // 填充标签
             for (int i = 0; i < this.Script.Funcs.Count; i++) {
                 var fn = this.Script.Funcs[i];
-                this.Labels[fn.Index] = new Define(fn.Name, 0);
+                this.Labels[fn.Index] = new Define(fn.Scope, fn.Name, 0);
             }
             for (int i = 0; i < this.Script.Codes.Count; i++) {
                 var code = this.Script.Codes[i];
@@ -544,7 +585,7 @@ namespace Sevm {
                         if (this.Labels[labIndex] != null) {
                             this.Labels[labIndex].IntPtr = i;
                         } else {
-                            this.Labels[labIndex] = new Define("", i);
+                            this.Labels[labIndex] = new Define(SirScopeTypes.Private, "", i);
                         }
                     }
                 }
@@ -562,7 +603,7 @@ namespace Sevm {
                 list.Values.Add(ptr);
             }
             // 执行函数
-            int idx = GetLabelIndex(func);
+            int idx = GetPublicLabelIndex(func);
             if (idx < 0) throw new Exception($"函数'{func}'入口缺失");
             return GetValue(ExecuteFunc(idx));
         }

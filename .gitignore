@@ -2,6 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
+/bin/
 /Properties/
 /[Dd]ebug/
 /[Rr]elease/
@@ -143,3 +144,5 @@ Sevm.Engine/obj/Release/netstandard2.1/Sevm.Engine.csproj.FileListAbsolute.txt
 Sevm.Engine/obj/Release/netstandard2.1/Sevm.Engine.dll
 Sevm.Engine/obj/Release/netstandard2.1/Sevm.Engine.GeneratedMSBuildEditorConfig.editorconfig
 Sevm.Engine/obj/Release/Sevm.Engine.1.0.2208.20.nuspec
+Sevm.Engine/obj/Release/Sevm.Engine.1.0.2208.21.nuspec
+Sevm.Engine/obj/Release/Sevm.Engine.1.0.2208.21.nuspec
