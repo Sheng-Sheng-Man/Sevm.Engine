@@ -119,6 +119,32 @@ namespace Sevm.Engine.Memory {
         protected virtual bool OnCheckNativeObject() { return false; }
 
         /// <summary>
+        /// 判断是否为函数
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public bool IsNativeFunction() { return OnCheckNativeFunction(); }
+
+        /// <summary>
+        /// 判断是否为函数
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool OnCheckNativeFunction() { return false; }
+
+        /// <summary>
+        /// 判断是否为函数
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public bool IsFunction() { return OnCheckFunction(); }
+
+        /// <summary>
+        /// 判断是否为函数
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool OnCheckFunction() { return false; }
+
+        /// <summary>
         /// 获取对象
         /// </summary>
         /// <returns></returns>

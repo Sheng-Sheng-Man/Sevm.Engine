@@ -10,7 +10,7 @@
 
 ## 中间语言
 
-SIR：Script Inter-language <https://github.com/inmount/SIR>
+SIR：Script Inter-language <https://github.com/Sheng-Sheng-Man/SIR>
 
 ## 虚拟机组成
 

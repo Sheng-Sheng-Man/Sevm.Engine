@@ -17,23 +17,6 @@ namespace Sevm {
     public class ScriptEngine : IDisposable {
 
         /// <summary>
-        /// 脚本事件参数
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public delegate void ScriptEventHandle(object sender, ScrpitEventArgs e);
-
-        /// <summary>
-        /// 执行事件
-        /// </summary>
-        public event ScriptEventHandle OnExecuting;
-
-        /// <summary>
-        /// 函数注册事件
-        /// </summary>
-        public event ScriptEventHandle OnRegFunction;
-
-        /// <summary>
         /// 原生函数接口
         /// </summary>
         /// <param name="args"></param>
@@ -56,7 +39,7 @@ namespace Sevm {
         /// <summary>
         /// 目录集合
         /// </summary>
-        public List<string> Pathes { get; private set; }
+        public List<string> Paths { get; private set; }
 
         /// <summary>
         /// 外部程序集合
@@ -87,6 +70,26 @@ namespace Sevm {
         /// 函数集合
         /// </summary>
         public Defines Labels { get; private set; }
+
+        /// <summary>
+        /// 注册函数集合
+        /// </summary>
+        internal ScriptFunctions RegisterFunctions { get; private set; }
+
+        /// <summary>
+        /// 获取父引擎
+        /// </summary>
+        public ScriptEngine Parent { get; private set; }
+
+        /// <summary>
+        /// 获取根引擎
+        /// </summary>
+        public ScriptEngine Root {
+            get {
+                if (this.Parent == null) return this;
+                return this.Parent.Root;
+            }
+        }
 
         /// <summary>
         /// 获取公共变量值
@@ -128,14 +131,15 @@ namespace Sevm {
 
         // 初始化
         private void init() {
-            this.OnExecuting += (object sender, ScrpitEventArgs e) => { };
-            this.OnRegFunction += (object sender, ScrpitEventArgs e) => { };
-            this.Pathes = new List<string>();
+            this.Paths = new List<string>();
             this.NativeFunctions = new NativeFunctions();
             this.Libraries = new ScriptLibraries();
             this.Storages = new Storages();
             this.Variables = new Defines();
             this.Labels = new Defines();
+            if (this.Libraries == null) this.Libraries = new ScriptLibraries();
+            if (this.Memories == null) this.Memories = new Memories();
+            if (this.RegisterFunctions == null) this.RegisterFunctions = new ScriptFunctions();
         }
 
         /// <summary>
@@ -143,7 +147,7 @@ namespace Sevm {
         /// </summary>
         public ScriptEngine() {
             this.Script = new SirScript();
-            this.Memories = new Memories();
+            this.Parent = null;
             this.init();
         }
 
@@ -152,7 +156,7 @@ namespace Sevm {
         /// </summary>
         public ScriptEngine(SirScript script) {
             this.Script = script;
-            this.Memories = new Memories();
+            this.Parent = null;
             this.init();
         }
 
@@ -160,10 +164,13 @@ namespace Sevm {
         /// 实例化一个脚本引擎
         /// </summary>
         /// <param name="script"></param>
-        /// <param name="memories"></param>
-        public ScriptEngine(SirScript script, Memories memories) {
+        /// <param name="engine">调用引擎</param>
+        public ScriptEngine(SirScript script, ScriptEngine engine) {
             this.Script = script;
-            this.Memories = memories;
+            this.Parent = engine;
+            this.Memories = engine.Memories;
+            this.RegisterFunctions = engine.RegisterFunctions;
+            this.Libraries = engine.Libraries;
             this.init();
         }
 
@@ -446,37 +453,30 @@ namespace Sevm {
                             SetValue(code.Exp1, GetValue(ExecuteFunc(code.Exp2.Content)));
                         } else {
                             string name = GetValue(code.Exp2);
-                            // 生成参数
-                            Engine.Memory.List arg = (Engine.Memory.List)this.Memories[this.Storages[0]];
-                            Params args = new Params();
-                            for (int i = 0; i < arg.Values.Count; i++) {
-                                args.Add(this.Memories[arg.Values[i]]);
-                            }
-                            // 优先从注册的函数中执行
-                            if (this.NativeFunctions.ContainsKey(name)) {
-                                // 执行并返回内容
-                                SetValue(code.Exp1, this.NativeFunctions[name](args));
-                            } else {
-                                // 从第三方程序中查找函数并执行
-                                bool found = false;
-                                for (int i = 0; i < this.Libraries.Count; i++) {
-                                    var lib = this.Libraries[i];
-                                    for (int j = 0; j < lib.Funcs.Count; j++) {
-                                        string funName = lib.Funcs[j].Name;
-                                        if (funName == name) {
-                                            // 执行并返回内容
-                                            using (var engine = new ScriptEngine(lib, this.Memories)) {
-                                                engine.OnExecuting += (object sender, ScrpitEventArgs e) => { this.OnExecuting(sender, e); };
-                                                engine.OnRegFunction += (object sender, ScrpitEventArgs e) => { this.OnRegFunction(sender, e); };
-                                                SetValue(code.Exp1, engine.Execute(funName, args, false));
-                                                found = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (found) break;
+                            // 判断函数是否已经注册
+                            if (!this.RegisterFunctions.ContainsKey(name)) throw new SirException(code.SourceLine, line, $"未找到外部函数'{name}'");
+                            // 读取注册函数
+                            var func = this.Memories[this.RegisterFunctions[name]];
+                            if (func.IsNativeObject()) {
+                                // 生成参数
+                                Engine.Memory.List arg = (Engine.Memory.List)this.Memories[this.Storages[0]];
+                                Params args = new Params();
+                                for (int i = 0; i < arg.Values.Count; i++) {
+                                    args.Add(this.Memories[arg.Values[i]]);
                                 }
-                                if (!found) throw new Exception($"未找到外部函数'{name}'");
+                                // 执行原生函数并返回结果
+                                SetValue(code.Exp1, ((Engine.Memory.NativeFunction)func).Function(args));
+                            } else if (func.IsFunction()) {
+                                // 读取自定义函数
+                                var fn = (Engine.Memory.Function)func;
+                                var lib = this.Libraries[fn.Library];
+                                string funName = lib.Script.Funcs[fn.Index].Name;
+                                // 执行并返回内容
+                                using (var engine = new ScriptEngine(lib.Script, this)) {
+                                    SetValue(code.Exp1, engine.Execute(funName, null, false));
+                                }
+                            } else {
+                                throw new SirException(code.SourceLine, line, $"函数'{name}'指针指向的内存不为函数");
                             }
                         }
                         line++; break;
@@ -495,33 +495,74 @@ namespace Sevm {
         /// <param name="clearMemories"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public Engine.Memory.Value Execute(string func, Params args, bool clearMemories) {
+        public Engine.Memory.Value Execute(int func, Params args, bool clear) {
             // 初始化
             this.NativeFunctions.Clear();
-            this.Libraries.Clear();
             this.Storages.Clear();
             this.Variables.Clear();
             this.Labels.Clear();
             // 初始化存储空间
-            if (clearMemories) {
+            if (clear) {
                 this.Memories.Clear();
                 this.Memories.Add(Value.None);
+                this.Libraries.Clear();
+                this.RegisterFunctions.Clear();
             }
             // 加载函数集
             for (int i = 0; i < this.Script.Imports.Count; i++) {
                 var import = this.Script.Imports[i];
                 switch (import.ImportType) {
                     case SirImportTypes.Use:
-                        this.OnRegFunction(this, new ScrpitEventArgs() { Func = import.Content });
+                        //this.OnRegFunction(this, new ScrpitEventArgs() { Func = import.Content });
+                        // 加载原生插件
+                        for (int j = 0; j < this.Paths.Count; j++) {
+                            string path = this.Paths[j];
+                            string file = $"{path}{import.Content}.dll";
+                            if (System.IO.File.Exists(file)) {
+                                // 判断文件是否已经加载存在
+                                // 加载动态库
+                                var dll = Assembly.LoadFrom(file);
+                                // 获取库中的所有类
+                                var tps = dll.GetTypes();
+                                foreach (var tp in tps) {
+                                    // 读取库中有特性定义的类
+                                    ScriptAttribute clsScript = tp.GetCustomAttribute<ScriptAttribute>();
+                                    if (clsScript != null) {
+                                        // 获取类中所有的函数
+                                        var methods = tp.GetMethods();
+                                        foreach (var method in methods) {
+                                            // 读取库中有特性定义的函数
+                                            ScriptAttribute clsMethod = tp.GetCustomAttribute<ScriptAttribute>();
+                                            if (clsMethod != null) {
+                                                string name = clsScript.Name + clsMethod.Name;
+                                                // 判断函数是否存在
+                                                if (!this.RegisterFunctions.ContainsKey(name)) {
+                                                    ScriptEngine.NativeFunction fn = (ScriptEngine.NativeFunction)Delegate.CreateDelegate(typeof(ScriptEngine.NativeFunction), method);
+                                                    // 注册新函数
+                                                    int funPtr = this.Memories.Count;
+                                                    this.Memories.Add(new Engine.Memory.NativeFunction(fn));
+                                                    this.RegisterFunctions[name] = funPtr;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
                         break;
                     case SirImportTypes.Lib:
-                        for (int j = 0; j < this.Pathes.Count; j++) {
-                            string path = this.Pathes[j];
+                        // 从所有路径中查找sbc文件
+                        for (int j = 0; j < this.Paths.Count; j++) {
+                            string path = this.Paths[j];
                             string file = $"{path}{import.Content}.sbc";
                             if (System.IO.File.Exists(file)) {
+                                // 判断文件是否已经加载存在
+                                if (this.Libraries.ContainsPath(file)) break;
+                                // 加载文件内容
                                 using (var f = System.IO.File.Open(file, FileMode.Open)) {
                                     List<byte> ls = new List<byte>();
-                                    byte[] buffer = new byte[1024];
+                                    byte[] buffer = new byte[4096];
                                     int len;
                                     do {
                                         len = f.Read(buffer, 0, buffer.Length);
@@ -529,7 +570,8 @@ namespace Sevm {
                                             ls.Add(buffer[k]);
                                         }
                                     } while (len > 0);
-                                    this.Libraries.Add(Parser.GetScript(ls.ToArray()));
+                                    // 添加库文件脚本
+                                    this.Libraries.Add(file, Parser.GetScript(ls.ToArray()));
                                     f.Close();
                                 }
                                 break;
@@ -537,6 +579,23 @@ namespace Sevm {
                         }
                         break;
                     default: throw new Exception($"不支持的加载方式'{import.ImportType.ToString()}'");
+                }
+            }
+            // 注册程序集中的所有函数
+            for (int i = 0; i < this.Libraries.Count; i++) {
+                var lib = this.Libraries[i];
+                for (int j = 0; j < lib.Script.Funcs.Count; j++) {
+                    var fun = lib.Script.Funcs[j];
+                    // 只注册公开函数
+                    if (fun.Scope == SirScopeTypes.Public) {
+                        // 判断函数是否存在
+                        if (!this.RegisterFunctions.ContainsKey(fun.Name)) {
+                            // 注册新函数
+                            int funPtr = this.Memories.Count;
+                            this.Memories.Add(new Function(i, j));
+                            this.RegisterFunctions[fun.Name] = funPtr;
+                        }
+                    }
                 }
             }
             // 填充数据
@@ -590,8 +649,6 @@ namespace Sevm {
                     }
                 }
             }
-            // 触发执行事件
-            this.OnExecuting(this, new ScrpitEventArgs() { Func = func });
             // 将参数填充到
             int ptr = this.Memories.Count;
             Engine.Memory.List list = new Engine.Memory.List(this.Memories);
@@ -603,9 +660,22 @@ namespace Sevm {
                 list.Values.Add(ptr);
             }
             // 执行函数
+            return GetValue(ExecuteFunc(func));
+        }
+
+        /// <summary>
+        /// 执行函数
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="args"></param>
+        /// <param name="clearMemories"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public Engine.Memory.Value Execute(string func, Params args, bool clear) {
+            // 执行函数
             int idx = GetPublicLabelIndex(func);
             if (idx < 0) throw new Exception($"函数'{func}'入口缺失");
-            return GetValue(ExecuteFunc(idx));
+            return Execute(idx, args, clear);
         }
 
         /// <summary>
