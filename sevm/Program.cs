@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using egg;
+using System.Runtime.CompilerServices;
 
 namespace sevm {
     /// <summary>
@@ -31,31 +32,33 @@ namespace sevm {
                     if (path.Length > 2 && path.StartsWith("'") && path.EndsWith("'")) path = path.Substring(1, path.Length - 2);
                     string file = "";
                     for (int i = 1; i < args.Length; i++) {
-                        if (args[i] == "-b" || args[i] == "--sbc") file = "+sbc";
-                        if (args[i] == "-c" || args[i] == "--sc") file = "+sc";
+                        if (args[i] == "-b" || args[i] == "--sbc") file = "sbc";
+                        if (args[i] == "-c" || args[i] == "--sc") file = "sc";
                         if (args[i] == "-?" || args[i] == "-h" || args[i] == "--help") file = "help";
                     }
                     System.Console.Title = $"SIR语言转换工具 Ver:{it.Version} - {path}";
+                    string libsPath = $"{it.ExecPath}libs";
+                    eggs.IO.CreateFolder(libsPath);
                     switch (file) {
-                        case "+sc":
-                            System.Console.WriteLine($"正在加载文件'{path}'...");
+                        case "sbc":
                             byte[] bytes = egg.File.BinaryFile.ReadAllBytes(path, false);
-                            string targetPath = it.GetClosedDirectoryPath(System.IO.Path.GetDirectoryName(path)) + System.IO.Path.GetFileNameWithoutExtension(path) + ".sc";
                             using (Sevm.Sir.SirScript ss = Sevm.Sir.Parser.GetScript(bytes)) {
-                                egg.File.UTF8File.WriteAllText(targetPath, ss.ToString());
-                                System.Console.WriteLine($"成功生成字节码文件'{targetPath}'!");
+                                using (Sevm.ScriptEngine engine = new Sevm.ScriptEngine(ss)) {
+                                    engine.Paths.Add(it.GetClosedDirectoryPath(System.IO.Path.GetDirectoryName(path)));
+                                    engine.Paths.Add(it.GetClosedDirectoryPath(libsPath));
+                                    engine.Execute();
+                                }
                             }
                             break;
-                        case "+sbc":
-                            System.Console.WriteLine($"正在加载文件'{path}'...");
+                        case "sc":
                             string script = eggs.IO.GetUtf8FileContent(path);
-                            targetPath = it.GetClosedDirectoryPath(System.IO.Path.GetDirectoryName(path)) + System.IO.Path.GetFileNameWithoutExtension(path) + ".sbc";
                             using (Sevm.Sir.SirScript ss = Sevm.Sir.Parser.GetScript(script)) {
-                                egg.File.BinaryFile.WriteAllBytes(targetPath, ss.ToBytes());
-                                System.Console.WriteLine($"成功生成字节码文件'{targetPath}'!");
+                                using (Sevm.ScriptEngine engine = new Sevm.ScriptEngine(ss)) {
+                                    engine.Paths.Add(it.GetClosedDirectoryPath(System.IO.Path.GetDirectoryName(path)));
+                                    engine.Paths.Add(it.GetClosedDirectoryPath(libsPath));
+                                    engine.Execute();
+                                }
                             }
-                            break;
-                        case "sc+sbc":
                             break;
                         case "help": Help(); break;
                         default:

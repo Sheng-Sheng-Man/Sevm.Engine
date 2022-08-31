@@ -5,7 +5,7 @@
     <Nullable>disable</Nullable>
     <PackageIcon>script.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.0.2208.22</Version>
+    <Version>1.0.2208.26</Version>
     <Description>使用SIR中间语言的脚本执行虚拟机</Description>
   </PropertyGroup>
 
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sevm.Sir" Version="1.0.2208.16" />
+    <PackageReference Include="Sevm.Sir" Version="1.0.2208.18" />
   </ItemGroup>
 
 </Project>

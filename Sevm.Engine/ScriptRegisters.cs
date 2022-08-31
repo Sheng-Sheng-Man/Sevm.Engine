@@ -7,7 +7,7 @@ namespace Sevm.Engine {
     /// <summary>
     /// 寄存器集合
     /// </summary>
-    public class Storages : List<int> {
+    public class ScriptRegisters : List<int> {
 
         // 自动扩展集合
         private void AutoCreate(int index) {

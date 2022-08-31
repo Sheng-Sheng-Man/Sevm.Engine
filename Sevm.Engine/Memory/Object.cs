@@ -54,13 +54,13 @@ namespace Sevm.Engine.Memory {
                 for (int i = 0; i < this.KeyList.Count; i++) {
                     if (this.KeyList[i] == key) return this.ValueList[i];
                 }
-                throw new Exception($"未找到键'{key}'");
+                throw new Sir.SirException($"未找到键'{key}'");
             }
             set {
                 for (int i = 0; i < this.KeyList.Count; i++) {
                     if (this.KeyList[i] == key) this.ValueList[i] = value;
                 }
-                throw new Exception($"未找到键'{key}'");
+                throw new Sir.SirException($"未找到键'{key}'");
             }
         }
 

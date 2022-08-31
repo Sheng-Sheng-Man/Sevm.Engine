@@ -59,7 +59,7 @@ namespace Sevm {
         /// <summary>
         /// 寄存器集合
         /// </summary>
-        public Storages Storages { get; private set; }
+        public ScriptRegisters Registers { get; private set; }
 
         /// <summary>
         /// 变量集合
@@ -131,12 +131,12 @@ namespace Sevm {
 
         // 初始化
         private void init() {
-            this.Paths = new List<string>();
             this.NativeFunctions = new NativeFunctions();
             this.Libraries = new ScriptLibraries();
-            this.Storages = new Storages();
             this.Variables = new Defines();
             this.Labels = new Defines();
+            if (this.Paths == null) this.Paths = new List<string>();
+            if (this.Registers == null) this.Registers = new ScriptRegisters();
             if (this.Libraries == null) this.Libraries = new ScriptLibraries();
             if (this.Memories == null) this.Memories = new Memories();
             if (this.RegisterFunctions == null) this.RegisterFunctions = new ScriptFunctions();
@@ -171,6 +171,8 @@ namespace Sevm {
             this.Memories = engine.Memories;
             this.RegisterFunctions = engine.RegisterFunctions;
             this.Libraries = engine.Libraries;
+            this.Registers = engine.Registers;
+            this.Paths = engine.Paths;
             this.init();
         }
 
@@ -205,9 +207,9 @@ namespace Sevm {
                     } else {
                         return Engine.Memory.Value.None;
                     }
-                case SirExpressionTypes.Storage: return this.Storages[param.Content];
+                case SirExpressionTypes.Register: return this.Registers[param.Content];
                 case SirExpressionTypes.Variable: return this.Memories[this.Variables[param.Content].IntPtr];
-                default: throw new Exception($"不支持的表达式获取类型'{param.Type.ToString()}'");
+                default: throw new SirException($"不支持的表达式获取类型'{param.Type.ToString()}'");
             }
         }
 
@@ -226,9 +228,9 @@ namespace Sevm {
                     } else {
                         return;
                     }
-                case SirExpressionTypes.Storage: this.Storages[param.Content] = value.ToInteger(); break;
+                case SirExpressionTypes.Register: this.Registers[param.Content] = value.ToInteger(); break;
                 case SirExpressionTypes.Variable: this.Memories[this.Variables[param.Content].IntPtr] = value; break;
-                default: throw new Exception($"不支持的表达式赋值类型'{param.Type.ToString()}'");
+                default: throw new SirException($"不支持的表达式赋值类型'{param.Type.ToString()}'");
             }
         }
 
@@ -240,7 +242,7 @@ namespace Sevm {
         /// <exception cref="Exception"></exception>
         public int Equal(SirExpression param1, SirExpression param2) {
             if (param1.Type == SirExpressionTypes.Value && param2.Type == SirExpressionTypes.Value) return param1.Content == param2.Content ? 1 : 0;
-            if (param1.Type == SirExpressionTypes.Value || param1.Type == SirExpressionTypes.Storage || param2.Type == SirExpressionTypes.Value || param2.Type == SirExpressionTypes.Storage) {
+            if (param1.Type == SirExpressionTypes.Value || param1.Type == SirExpressionTypes.Register || param2.Type == SirExpressionTypes.Value || param2.Type == SirExpressionTypes.Register) {
                 var value1 = GetValue(param1);
                 var value2 = GetValue(param2);
                 if (value1.IsNumber() && value2.IsNumber()) return value1.ToDouble() == value2.ToDouble() ? 1 : 0;
@@ -255,7 +257,7 @@ namespace Sevm {
                 case SirExpressionTypes.Variable:
                     ptr1 = this.Variables[param1.Content].IntPtr;
                     break;
-                default: throw new Exception($"不支持的表达式赋值类型'{param1.Type.ToString()}'");
+                default: throw new SirException($"不支持的表达式赋值类型'{param1.Type.ToString()}'");
             }
             switch (param2.Type) {
                 case SirExpressionTypes.IntPtr:
@@ -264,7 +266,7 @@ namespace Sevm {
                 case SirExpressionTypes.Variable:
                     ptr2 = this.Variables[param2.Content].IntPtr;
                     break;
-                default: throw new Exception($"不支持的表达式赋值类型'{param2.Type.ToString()}'");
+                default: throw new SirException($"不支持的表达式赋值类型'{param2.Type.ToString()}'");
             }
             if (ptr1 <= 0 && ptr2 <= 0) return 1;
             if (ptr1 == ptr2) return 1;
@@ -277,7 +279,7 @@ namespace Sevm {
         // 执行函数
         private SirExpression ExecuteFunc(int funcIndex) {
             int line = this.Labels[funcIndex].IntPtr;
-            if (line < 0) throw new Exception($"函数'@{funcIndex}'入口缺失");
+            if (line < 0) throw new SirException($"函数'@{funcIndex}'入口缺失");
             while (line < this.Script.Codes.Count) {
                 var code = this.Script.Codes[line];
                 switch (code.Instruction) {
@@ -290,7 +292,7 @@ namespace Sevm {
                         SetValue(code.Exp1, GetValue(code.Exp2));
                         line++; break;
                     case SirCodeInstructionTypes.Ptr:
-                        if (code.Exp1.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        if (code.Exp1.Type != SirExpressionTypes.Variable) throw new SirException($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
                         if (code.Exp2.Type != SirExpressionTypes.None) {
                             // 新建变量或修改变量指针
                             if (this.Variables[code.Exp1.Content] == null) {
@@ -311,7 +313,7 @@ namespace Sevm {
                         }
                         line++; break;
                     case SirCodeInstructionTypes.Lea:
-                        if (code.Exp2.Type != SirExpressionTypes.Variable) throw new Exception($"不支持的表达式类型'{code.Exp2.Type.ToString()}'");
+                        if (code.Exp2.Type != SirExpressionTypes.Variable) throw new SirException(code.SourceLine, line, $"不支持的表达式类型'{code.Exp2.Type.ToString()}'");
                         SetValue(code.Exp1, this.Variables[code.Exp2.Content].IntPtr);
                         line++; break;
                     case SirCodeInstructionTypes.Int:
@@ -438,11 +440,11 @@ namespace Sevm {
                         line++; break;
                     // 七、区域操作指令
                     case SirCodeInstructionTypes.Jmp:
-                        if (code.Exp1.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        if (code.Exp1.Type != SirExpressionTypes.Label) throw new SirException(code.SourceLine, line, $"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
                         line = this.Labels[code.Exp1.Content].IntPtr;
                         break;
                     case SirCodeInstructionTypes.Jmpf:
-                        if (code.Exp2.Type != SirExpressionTypes.Label) throw new Exception($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
+                        if (code.Exp2.Type != SirExpressionTypes.Label) throw new SirException(code.SourceLine, line, $"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
                         if (GetValue(code.Exp1).ToDouble() > 0) {
                             line = this.Labels[code.Exp2.Content].IntPtr;
                             break;
@@ -457,9 +459,9 @@ namespace Sevm {
                             if (!this.RegisterFunctions.ContainsKey(name)) throw new SirException(code.SourceLine, line, $"未找到外部函数'{name}'");
                             // 读取注册函数
                             var func = this.Memories[this.RegisterFunctions[name]];
-                            if (func.IsNativeObject()) {
+                            if (func.IsNativeFunction()) {
                                 // 生成参数
-                                Engine.Memory.List arg = (Engine.Memory.List)this.Memories[this.Storages[0]];
+                                Engine.Memory.List arg = (Engine.Memory.List)this.Memories[this.Registers[0]];
                                 Params args = new Params();
                                 for (int i = 0; i < arg.Values.Count; i++) {
                                     args.Add(this.Memories[arg.Values[i]]);
@@ -472,7 +474,7 @@ namespace Sevm {
                                 var lib = this.Libraries[fn.Library];
                                 string funName = lib.Script.Funcs[fn.Index].Name;
                                 // 执行并返回内容
-                                using (var engine = new ScriptEngine(lib.Script, this)) {
+                                using (var engine = new ScriptEngine(lib.Script, this.Root)) {
                                     SetValue(code.Exp1, engine.Execute(funName, null, false));
                                 }
                             } else {
@@ -481,28 +483,21 @@ namespace Sevm {
                         }
                         line++; break;
                     case SirCodeInstructionTypes.Ret: return code.Exp1;
-                    default: throw new Exception($"不支持的指令类型'{code.Instruction.ToString()}'");
+                    default: throw new SirException(code.SourceLine, line, $"不支持的指令类型'{code.Instruction.ToString()}'");
                 }
             }
             return SirExpression.Value(0);
         }
 
-        /// <summary>
-        /// 执行函数
-        /// </summary>
-        /// <param name="func"></param>
-        /// <param name="args"></param>
-        /// <param name="clearMemories"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public Engine.Memory.Value Execute(int func, Params args, bool clear) {
+        // 执行初始化
+        private void ExecuteInit(Params args, bool clear) {
             // 初始化
             this.NativeFunctions.Clear();
-            this.Storages.Clear();
             this.Variables.Clear();
             this.Labels.Clear();
             // 初始化存储空间
             if (clear) {
+                this.Registers.Clear();
                 this.Memories.Clear();
                 this.Memories.Add(Value.None);
                 this.Libraries.Clear();
@@ -532,7 +527,7 @@ namespace Sevm {
                                         var methods = tp.GetMethods();
                                         foreach (var method in methods) {
                                             // 读取库中有特性定义的函数
-                                            ScriptAttribute clsMethod = tp.GetCustomAttribute<ScriptAttribute>();
+                                            ScriptAttribute clsMethod = method.GetCustomAttribute<ScriptAttribute>();
                                             if (clsMethod != null) {
                                                 string name = clsScript.Name + clsMethod.Name;
                                                 // 判断函数是否存在
@@ -578,7 +573,7 @@ namespace Sevm {
                             }
                         }
                         break;
-                    default: throw new Exception($"不支持的加载方式'{import.ImportType.ToString()}'");
+                    default: throw new SirException($"不支持的加载方式'{import.ImportType.ToString()}'");
                 }
             }
             // 注册程序集中的所有函数
@@ -623,7 +618,7 @@ namespace Sevm {
                         this.Variables[data.Index] = new Define(SirScopeTypes.Private, "", idxData);
                         //this.Memories[data.IntPtr] = data.GetString();
                         break;
-                    default: throw new Exception($"不支持的数据类型'{data.DataType.ToString()}'");
+                    default: throw new SirException($"不支持的数据类型'{data.DataType.ToString()}'");
                 }
             }
             // 填充变量
@@ -649,16 +644,31 @@ namespace Sevm {
                     }
                 }
             }
-            // 将参数填充到
-            int ptr = this.Memories.Count;
-            Engine.Memory.List list = new Engine.Memory.List(this.Memories);
-            this.Memories[ptr] = list;
-            this.Storages[0] = ptr;
-            for (int i = 0; i < args.Count; i++) {
-                ptr = this.Memories.Count;
-                this.Memories[ptr] = args[i];
-                list.Values.Add(ptr);
+            if (args != null) {
+                // 将参数填充到
+                int ptr = this.Memories.Count;
+                Engine.Memory.List list = new Engine.Memory.List(this.Memories);
+                this.Memories[ptr] = list;
+                this.Registers[0] = ptr;
+                for (int i = 0; i < args.Count; i++) {
+                    ptr = this.Memories.Count;
+                    this.Memories[ptr] = args[i];
+                    list.Values.Add(ptr);
+                }
             }
+        }
+
+        /// <summary>
+        /// 执行函数
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="args"></param>
+        /// <param name="clearMemories"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public Engine.Memory.Value Execute(int func, Params args, bool clear) {
+            // 执行初始化
+            ExecuteInit(args, clear);
             // 执行函数
             return GetValue(ExecuteFunc(func));
         }
@@ -672,10 +682,12 @@ namespace Sevm {
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public Engine.Memory.Value Execute(string func, Params args, bool clear) {
+            // 执行初始化
+            ExecuteInit(args, clear);
             // 执行函数
             int idx = GetPublicLabelIndex(func);
-            if (idx < 0) throw new Exception($"函数'{func}'入口缺失");
-            return Execute(idx, args, clear);
+            if (idx < 0) throw new SirException($"函数'{func}'入口缺失");
+            return GetValue(ExecuteFunc(idx));
         }
 
         /// <summary>
@@ -692,7 +704,7 @@ namespace Sevm {
         public void Dispose() {
             this.NativeFunctions.Clear();
             this.Libraries.Clear();
-            this.Storages.Clear();
+            this.Registers.Clear();
             this.Memories.Clear();
             this.Variables.Clear();
             this.Labels.Clear();
