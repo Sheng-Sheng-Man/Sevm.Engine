@@ -15,4 +15,16 @@
     <ProjectReference Include="..\Sevm.Engine\Sevm.Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="libs\Sevm.Console.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="libs\Sevm.System.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="libs\控制台.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

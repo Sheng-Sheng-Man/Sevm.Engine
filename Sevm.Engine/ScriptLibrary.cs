@@ -15,6 +15,11 @@ namespace Sevm.Engine {
         public string Path { get; private set; }
 
         /// <summary>
+        /// 文件名称
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// 获取脚本对象
         /// </summary>
         public Sevm.Sir.SirScript Script { get; private set; }
@@ -26,6 +31,7 @@ namespace Sevm.Engine {
         /// <param name="script"></param>
         public ScriptLibrary(string path, Sevm.Sir.SirScript script) {
             this.Path = path;
+            this.Name = System.IO.Path.GetFileNameWithoutExtension(path);
             this.Script = script;
         }
 
