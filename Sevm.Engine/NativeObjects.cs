@@ -5,8 +5,8 @@ using System.Text;
 namespace Sevm.Engine {
 
     /// <summary>
-    /// 脚本函数
+    /// 原生对象集合
     /// </summary>
-    public class ScriptFunctions : Dictionary<string, Sevm.MemoryPtr> {
-    }
+    public class NativeObjects : List<object> { }
+
 }

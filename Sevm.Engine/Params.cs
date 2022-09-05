@@ -7,5 +7,5 @@ namespace Sevm.Engine {
     /// <summary>
     /// 函数参数
     /// </summary>
-    public class Params : List<Memory.Value> { }
+    public class Params : List<Sevm.MemoryPtr> { }
 }

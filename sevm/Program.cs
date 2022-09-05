@@ -53,9 +53,12 @@ namespace sevm {
                         case "sc":
                             string script = eggs.IO.GetUtf8FileContent(path);
                             using (Sevm.Sir.SirScript ss = Sevm.Sir.Parser.GetScript(script)) {
+                                Console.WriteLine("[SIR]");
+                                Console.WriteLine(ss.ToString());
                                 using (Sevm.ScriptEngine engine = new Sevm.ScriptEngine(ss)) {
                                     engine.Paths.Add(it.GetClosedDirectoryPath(System.IO.Path.GetDirectoryName(path)));
                                     engine.Paths.Add(it.GetClosedDirectoryPath(libsPath));
+                                    Console.WriteLine("[Excute]");
                                     engine.Execute();
                                 }
                             }

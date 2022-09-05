@@ -7,6 +7,6 @@ namespace Sevm.Engine {
     /// <summary>
     /// 原生函数集合
     /// </summary>
-    public class NativeFunctions : Dictionary<string, ScriptEngine.NativeFunction> { }
+    public class NativeFunctions : List<ScriptEngine.NativeFunction> { }
 
 }

@@ -5,9 +5,9 @@ using System.Text;
 namespace Sevm.Engine {
 
     /// <summary>
-    /// 定义信息
+    /// 变量信息
     /// </summary>
-    public class Define {
+    public class ScriptVariable {
 
         /// <summary>
         /// 获取或设置名称
@@ -22,26 +22,31 @@ namespace Sevm.Engine {
         /// <summary>
         /// 获取或设置指针
         /// </summary>
-        public int IntPtr { get; set; }
+        public Sevm.MemoryPtr MemoryPtr { get; set; }
 
         /// <summary>
         /// 对象实例化
         /// </summary>
+        /// <param name="scope"></param>
         /// <param name="name"></param>
         /// <param name="ptr"></param>
-        public Define(Sir.SirScopeTypes scope, string name, int ptr) {
+        public ScriptVariable(Sir.SirScopeTypes scope, string name, MemoryPtr ptr) {
             this.ScopeType = scope;
             Name = name;
-            IntPtr = ptr;
+            MemoryPtr = ptr;
         }
 
         /// <summary>
         /// 对象实例化
         /// </summary>
-        public Define() {
+        public ScriptVariable() {
             this.ScopeType = Sir.SirScopeTypes.Private;
             Name = "";
-            IntPtr = 0;
+            MemoryPtr = new MemoryPtr() {
+                Type = MemoryTypes.None,
+                Size = 0,
+                IntPtr = IntPtr.Zero
+            };
         }
 
     }
