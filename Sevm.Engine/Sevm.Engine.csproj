@@ -5,7 +5,7 @@
     <Nullable>disable</Nullable>
     <PackageIcon>script.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.1.2209.33</Version>
+    <Version>1.2.2210.39</Version>
     <Description>使用SIR中间语言的脚本执行虚拟机</Description>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <Authors>Uncle Zheng</Authors>
@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sevm.Memory" Version="1.0.2209.20" />
-    <PackageReference Include="Sevm.Sir" Version="1.1.2209.19" />
+    <PackageReference Include="Sevm.Memory" Version="1.1.2210.24" />
+    <PackageReference Include="Sevm.Sir" Version="1.2.2210.24" />
   </ItemGroup>
 
 </Project>

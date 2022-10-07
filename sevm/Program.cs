@@ -17,8 +17,8 @@ namespace sevm {
             System.Console.WriteLine();
             System.Console.WriteLine("[options]");
             System.Console.WriteLine("-? -h --help : 帮助");
-            System.Console.WriteLine("-b --sbc : 从汇编文件生成字节码");
-            System.Console.WriteLine("-c --sc : 从字节码翻译生成汇编文件");
+            System.Console.WriteLine("-b --sbc : 字节码方式运行");
+            System.Console.WriteLine("-c --sc : 汇编文件方式运行");
         }
 
         public static void Main(string[] args) {

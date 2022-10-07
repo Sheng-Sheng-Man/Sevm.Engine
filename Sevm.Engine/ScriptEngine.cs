@@ -185,101 +185,25 @@ namespace Sevm {
 
         // 获取标签定义行
         private int GetPublicLabelIndex(string Name) {
-            for (int i = 0; i < Labels.Count; i++) {
-                var lab = Labels[i];
-                if (lab != null) {
-                    if (lab.ScopeType == SirScopeTypes.Public) {
-                        if (lab.Name == Name) {
-                            return i;
-                        }
+            foreach (var item in Labels) {
+                var lab = item.Value;
+                if (lab.ScopeType == SirScopeTypes.Public) {
+                    if (lab.Name == Name) {
+                        return item.Key;
                     }
                 }
             }
+            //for (int i = 0; i < Labels.Count; i++) {
+            //    var lab = Labels[i];
+            //    if (lab != null) {
+            //        if (lab.ScopeType == SirScopeTypes.Public) {
+            //            if (lab.Name == Name) {
+            //                return i;
+            //            }
+            //        }
+            //    }
+            //}
             return -1;
-        }
-
-        /// <summary>
-        /// 获取表达式对应的值
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public Sevm.MemoryPtr GetValue(SirExpression param) {
-            switch (param.Type) {
-                case SirExpressionTypes.None: return Sevm.MemoryPtr.None;
-                case SirExpressionTypes.Value: return param.Content;
-                case SirExpressionTypes.IntPtr:
-                    if (param.Content > 0) {
-                        return Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(param.Content));
-                    } else {
-                        return Sevm.MemoryPtr.None;
-                    }
-                case SirExpressionTypes.Register: return this.Registers[param.Content];
-                case SirExpressionTypes.Variable: return this.Variables[param.Content].MemoryPtr;
-                default: throw new SirException($"不支持的表达式获取类型'{param.Type.ToString()}'");
-            }
-        }
-
-        /// <summary>
-        /// 向表达式赋值
-        /// </summary>
-        /// <param name="param"></param>
-        /// <param name="value"></param>
-        /// <exception cref="Exception"></exception>
-        public void SetValue(SirExpression param, Sevm.MemoryPtr value) {
-            switch (param.Type) {
-                case SirExpressionTypes.IntPtr:
-                    if (param.Content <= 0) return;
-                    throw new SirException($"不支持的表达式赋值类型'{param.Type.ToString()}'");
-                case SirExpressionTypes.Register:
-                    this.Registers[param.Content] = value.GetLong();
-                    break;
-                case SirExpressionTypes.Variable:
-                    this.Memory.Set(this.Variables[param.Content].MemoryPtr, value);
-                    break;
-                default: throw new SirException($"不支持的表达式赋值类型'{param.Type.ToString()}'");
-            }
-        }
-
-        /// <summary>
-        /// 向表达式赋值
-        /// </summary>
-        /// <param name="param"></param>
-        /// <param name="value"></param>
-        /// <exception cref="Exception"></exception>
-        public void SetValue(SirExpression param, string value) {
-            switch (param.Type) {
-                case SirExpressionTypes.Variable:
-                    this.Variables[param.Content].MemoryPtr = this.Memory.CreateString(value);
-                    break;
-                default: throw new SirException($"不支持的表达式字符串赋值类型'{param.Type.ToString()}'");
-            }
-        }
-
-
-        /// <summary>
-        /// 向表达式赋值
-        /// </summary>
-        /// <param name="param"></param>
-        /// <param name="value"></param>
-        /// <exception cref="Exception"></exception>
-        public void SetValue(SirExpression param, double value) {
-            switch (param.Type) {
-                case SirExpressionTypes.IntPtr:
-                    // 判断是否为空指针
-                    if (param.Content > 0) {
-                        this.Memory.Set(Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(param.Content)), value);
-                        break;
-                    } else {
-                        return;
-                    }
-                case SirExpressionTypes.Register:
-                    this.Registers[param.Content] = (long)value; break;
-                case SirExpressionTypes.Variable:
-                    this.Memory.Set(this.Variables[param.Content].MemoryPtr, value);
-                    break;
-                default: throw new SirException($"不支持的表达式赋值类型'{param.Type.ToString()}'");
-            }
         }
 
         /// <summary>
@@ -288,53 +212,26 @@ namespace Sevm {
         /// <param name="param1"></param>
         /// <param name="param2"></param>
         /// <exception cref="Exception"></exception>
-        public int Equal(SirExpression param1, SirExpression param2) {
-            // 如果两个参数都是值对象，则判断两个值是否相等
-            if (param1.Type == SirExpressionTypes.Value && param2.Type == SirExpressionTypes.Value) return param1.Content == param2.Content ? 1 : 0;
-            if (param1.Type == SirExpressionTypes.Value || param1.Type == SirExpressionTypes.Register || param2.Type == SirExpressionTypes.Value || param2.Type == SirExpressionTypes.Register) {
-                var value1 = GetValue(param1);
-                var value2 = GetValue(param2);
-                return value1.GetDouble() == value2.GetDouble() ? 1 : 0;
-            }
+        public int Equal(int param1, int param2) {
             // 先判断两个参数是否指针相等
-            Sevm.MemoryPtr ptr1 = null;
-            Sevm.MemoryPtr ptr2 = null;
-            switch (param1.Type) {
-                case SirExpressionTypes.IntPtr:
-                    ptr1 = Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(param1.Content));
-                    break;
-                case SirExpressionTypes.Variable:
-                    ptr1 = this.Variables[param1.Content].MemoryPtr;
-                    break;
-                default: throw new SirException($"不支持的表达式赋值类型'{param1.Type.ToString()}'");
-            }
-            switch (param2.Type) {
-                case SirExpressionTypes.IntPtr:
-                    ptr2 = Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(param2.Content));
-                    break;
-                case SirExpressionTypes.Variable:
-                    ptr2 = this.Variables[param2.Content].MemoryPtr;
-                    break;
-                default: throw new SirException($"不支持的表达式赋值类型'{param2.Type.ToString()}'");
-            }
-            if (ptr1.IntPtr == ptr2.IntPtr) return 1;
+            Sevm.MemoryPtr ptr1 = this.Variables[param1].MemoryPtr;
+            Sevm.MemoryPtr ptr2 = this.Variables[param2].MemoryPtr;
+            if (ptr1.Content == ptr2.Content) return 1;
             // 最后判断两个参数的实际值是否相等
             if (ptr1 == ptr2) return 1;
-            var val1 = GetValue(param1);
-            var val2 = GetValue(param2);
-            switch (val1.Type) {
+            switch (ptr1.Type) {
                 case MemoryTypes.String:
-                    return val1.GetString() == val2.GetString() ? 1 : 0;
+                    return ptr1.GetString() == ptr2.GetString() ? 1 : 0;
                 case MemoryTypes.Integer:
                 case MemoryTypes.Long:
                 case MemoryTypes.Double:
                 case MemoryTypes.Value:
-                    switch (val2.Type) {
+                    switch (ptr2.Type) {
                         case MemoryTypes.Integer:
                         case MemoryTypes.Long:
                         case MemoryTypes.Double:
                         case MemoryTypes.Value:
-                            return val1.GetDouble() == val2.GetDouble() ? 1 : 0;
+                            return ptr1.GetDouble() == ptr2.GetDouble() ? 1 : 0;
                         default: return 0;
                     }
                 default: return 0;
@@ -342,12 +239,12 @@ namespace Sevm {
         }
 
         // 执行函数
-        private SirExpression ExecuteFunc(int funcIndex) {
+        private int ExecuteFunc(int funcIndex) {
             int line = this.Labels[funcIndex].IntPtr;
             if (line < 0) throw new SirException($"函数'@{funcIndex}'入口缺失");
             try {
                 while (line < this.Script.Codes.Count) {
-                    Debug.WriteLine($"->{line} {this.Script.Codes[line].ToString()}");
+                    Debug.WriteLine($"[{this.Script.Codes[line].SourceLine}] -> {line} {this.Script.Codes[line].ToString()}");
                     var code = this.Script.Codes[line];
                     switch (code.Instruction) {
                         // 空指令
@@ -356,49 +253,44 @@ namespace Sevm {
                             line++; break;
                         // 二、数据指令
                         case SirCodeInstructionTypes.Mov:
-                            SetValue(code.Exp1, GetValue(code.Exp2));
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Variables[code.Exp2].MemoryPtr);
+                            //this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Variables[code.Exp2].MemoryPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Ptr:
-                            if (code.Exp1.Type != SirExpressionTypes.Variable) throw new SirException($"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
-                            if (code.Exp2.Type != SirExpressionTypes.None) {
+                            if (code.Exp2 > 0) {
                                 // 新建变量或修改变量指针
-                                if (this.Variables[code.Exp1.Content] == null) {
-                                    this.Variables[code.Exp1.Content] = new ScriptVariable(SirScopeTypes.Private, "", Sevm.MemoryPtr.CreateFromAddr(GetValue(code.Exp2).GetLong()));
+                                if (this.Variables[code.Exp1] == null) {
+                                    this.Variables[code.Exp1] = new ScriptVariable(SirScopeTypes.Private, "", Sevm.MemoryPtr.CreateFromAddr(this.Variables[code.Exp2].MemoryPtr.GetLong()));
                                 } else {
-                                    this.Variables[code.Exp1.Content].MemoryPtr = Sevm.MemoryPtr.CreateFromAddr(GetValue(code.Exp2).GetLong());
+                                    this.Variables[code.Exp1].MemoryPtr = Sevm.MemoryPtr.CreateFromAddr(this.Variables[code.Exp2].MemoryPtr.GetLong());
                                 }
                             } else {
-                                //// 新建虚拟内存块
-                                //int ptr = this.Memory.Count;
-                                //this.Memory[ptr] = Engine.Memory.Value.None;
                                 // 新建变量或修改变量指针
-                                if (this.Variables[code.Exp1.Content] == null) {
-                                    this.Variables[code.Exp1.Content] = new ScriptVariable(SirScopeTypes.Private, "", Sevm.MemoryPtr.None);
+                                if (this.Variables[code.Exp1] == null) {
+                                    this.Variables[code.Exp1] = new ScriptVariable(SirScopeTypes.Private, "", Sevm.MemoryPtr.None);
                                 } else {
-                                    this.Variables[code.Exp1.Content].MemoryPtr = Sevm.MemoryPtr.None;
+                                    this.Variables[code.Exp1].MemoryPtr = Sevm.MemoryPtr.None;
                                 }
                             }
                             line++; break;
                         case SirCodeInstructionTypes.Lea:
-                            if (code.Exp2.Type != SirExpressionTypes.Variable) throw new SirException(code.SourceLine, line, $"不支持的表达式类型'{code.Exp2.Type.ToString()}'");
-                            SetValue(code.Exp1, (double)this.Variables[code.Exp2.Content].MemoryPtr.IntPtr);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)this.Variables[code.Exp2].MemoryPtr.Content);
                             line++; break;
                         case SirCodeInstructionTypes.Int:
-                            SetValue(code.Exp1, (double)GetValue(code.Exp2).GetLong());
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)this.Variables[code.Exp2].MemoryPtr.GetLong());
                             line++; break;
                         case SirCodeInstructionTypes.Frac:
-                            SetValue(code.Exp1, GetValue(code.Exp2).GetDouble() - GetValue(code.Exp2).GetLong());
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Variables[code.Exp2].MemoryPtr.GetDouble() - this.Variables[code.Exp2].MemoryPtr.GetLong());
                             line++; break;
                         // 三、类型操作指令
                         case SirCodeInstructionTypes.List:
-                            SetValue(code.Exp1, this.Memory.CreateList());
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Memory.CreateList());
                             line++; break;
                         case SirCodeInstructionTypes.Ptrl: // 设置列表内容指针
-                            if (code.Exp1.Type != SirExpressionTypes.Variable) throw new SirException(code.SourceLine, line, $"不支持的表达式类型'{code.Exp1.Type.ToString()}'");
-                            Sevm.MemoryList list = this.Variables[code.Exp1.Content].MemoryPtr.GetList(this.Memory);
+                            Sevm.MemoryList list = this.Variables[code.Exp1].MemoryPtr.GetList(this.Memory);
                             // 动态添加列表项
-                            int ptrListIndex = GetValue(code.Exp2).GetInteger();
-                            long ptrListValue = GetValue(code.Exp3).GetLong();
+                            int ptrListIndex = this.Variables[code.Exp2].MemoryPtr.GetInteger();
+                            long ptrListValue = this.Variables[code.Exp3].MemoryPtr.GetLong();
                             // 判断赋值的指针是否大于0
                             if (ptrListValue > 0) {
                                 // 自动添加数量
@@ -417,107 +309,112 @@ namespace Sevm {
                             }
                             line++; break;
                         case SirCodeInstructionTypes.Leal: // 获取列表内容指针
-                            Sevm.MemoryPtr ptrList = this.Variables[code.Exp2.Content].MemoryPtr;
-                            SetValue(code.Exp1, (double)ptrList.IntPtr);
+                            Sevm.MemoryPtr ptrList = this.Variables[code.Exp2].MemoryPtr;
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)ptrList.IntPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Idx: // 获取内容匹配索引
-                            list = this.Variables[code.Exp2.Content].MemoryPtr.GetList(this.Memory);
+                            list = this.Variables[code.Exp2].MemoryPtr.GetList(this.Memory);
                             // 动态添加列表项
                             int idx = -1;
-                            string str = GetValue(code.Exp3).GetString();
+                            string str = this.Variables[code.Exp3].MemoryPtr.GetString();
                             idx = list.GetIndex(str);
                             // 赋值内容
-                            SetValue(code.Exp1, (double)idx);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)idx);
                             line++; break;
                         case SirCodeInstructionTypes.Join: // 连接字符串
-                            list = GetValue(code.Exp2).GetList(this.Memory);
+                            list = this.Variables[code.Exp2].MemoryPtr.GetList(this.Memory);
                             string sz = list.ConvertListToString();
-                            SetValue(code.Exp1, sz);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, sz);
                             line++; break;
                         case SirCodeInstructionTypes.Cnt:
-                            SetValue(code.Exp1, (double)GetValue(code.Exp2).GetList(this.Memory).Count);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)this.Variables[code.Exp2].MemoryPtr.GetList(this.Memory).Count);
                             line++; break;
                         case SirCodeInstructionTypes.Obj:
                             Sevm.MemoryPtr ptrObj = this.Memory.CreateObject();
-                            SetValue(code.Exp1, ptrObj);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, ptrObj);
                             line++; break;
                         //case SirCodeInstructionTypes.Ptrk: // 设置对象键列表指针
-                        //    obj = (Engine.Memory.Object)GetValue(code.Exp1);
-                        //    obj.Keys = GetValue(code.Exp2);
+                        //    obj = (Engine.Memory.Object)this.Variables[code.Exp1].MemoryPtr;
+                        //    obj.Keys = this.Variables[code.Exp2].MemoryPtr;
                         //    line++; break;
                         //case SirCodeInstructionTypes.Ptrv: // 设置对象值列表指针
-                        //    obj = (Engine.Memory.Object)GetValue(code.Exp1);
-                        //    obj.Values = GetValue(code.Exp2);
+                        //    obj = (Engine.Memory.Object)this.Variables[code.Exp1].MemoryPtr;
+                        //    obj.Values = this.Variables[code.Exp2].MemoryPtr;
                         //    line++; break;
                         case SirCodeInstructionTypes.Leak: // 获取对象键列表指针
-                            Sevm.MemoryObject obj = GetValue(code.Exp2).GetObject(this.Memory);
-                            SetValue(code.Exp1, (double)obj.GetKeys().IntPtr);
+                            Sevm.MemoryObject obj = this.Variables[code.Exp2].MemoryPtr.GetObject(this.Memory);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)obj.GetKeys().IntPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Leav: // 获取对象值列表指针
-                            obj = GetValue(code.Exp2).GetObject(this.Memory);
-                            SetValue(code.Exp1, (double)obj.GetValues().IntPtr);
+                            obj = this.Variables[code.Exp2].MemoryPtr.GetObject(this.Memory);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)obj.GetValues().IntPtr);
                             line++; break;
                         // 四、运算操作指令
                         case SirCodeInstructionTypes.Add:
-                            GetValue(code.Exp1).Add(GetValue(code.Exp2));
+                            this.Variables[code.Exp1].MemoryPtr.Add(this.Variables[code.Exp2].MemoryPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Sub:
-                            GetValue(code.Exp1).Sub(GetValue(code.Exp2));
+                            this.Variables[code.Exp1].MemoryPtr.Sub(this.Variables[code.Exp2].MemoryPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Mul:
-                            GetValue(code.Exp1).Mul(GetValue(code.Exp2));
+                            this.Variables[code.Exp1].MemoryPtr.Mul(this.Variables[code.Exp2].MemoryPtr);
                             line++; break;
                         case SirCodeInstructionTypes.Div:
-                            GetValue(code.Exp1).Div(GetValue(code.Exp2));
+                            this.Variables[code.Exp1].MemoryPtr.Div(this.Variables[code.Exp2].MemoryPtr);
                             line++; break;
                         // 五、逻辑操作指令
                         case SirCodeInstructionTypes.Not:
-                            SetValue(code.Exp1, (double)(GetValue(code.Exp1).GetInteger() > 0 ? 0 : 1));
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)(this.Variables[code.Exp1].MemoryPtr.GetInteger() > 0 ? 0 : 1));
                             line++; break;
                         case SirCodeInstructionTypes.And:
-                            SetValue(code.Exp1, (double)(GetValue(code.Exp1).GetInteger() & GetValue(code.Exp2).GetInteger()));
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)(this.Variables[code.Exp1].MemoryPtr.GetInteger() & this.Variables[code.Exp2].MemoryPtr.GetInteger()));
                             line++; break;
                         case SirCodeInstructionTypes.Or:
-                            SetValue(code.Exp1, (double)(GetValue(code.Exp1).GetInteger() | GetValue(code.Exp2).GetInteger()));
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)(this.Variables[code.Exp1].MemoryPtr.GetInteger() | this.Variables[code.Exp2].MemoryPtr.GetInteger()));
                             line++; break;
                         case SirCodeInstructionTypes.Xor:
-                            SetValue(code.Exp1, (double)(GetValue(code.Exp1).GetInteger() ^ GetValue(code.Exp2).GetInteger()));
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, (double)(this.Variables[code.Exp1].MemoryPtr.GetInteger() ^ this.Variables[code.Exp2].MemoryPtr.GetInteger()));
                             line++; break;
                         // 六、比较指令
                         case SirCodeInstructionTypes.Equal:
                             double val = (double)Equal(code.Exp2, code.Exp3);
-                            SetValue(code.Exp1, val);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, val);
                             line++; break;
                         case SirCodeInstructionTypes.Large:
-                            SetValue(code.Exp1, GetValue(code.Exp2).GetDouble() > GetValue(code.Exp3).GetDouble() ? 1.0 : 0);
+                            double dbValue2 = this.Variables[code.Exp2].MemoryPtr.GetDouble();
+                            double dbValue3 = this.Variables[code.Exp3].MemoryPtr.GetDouble();
+                            Debug.WriteLine($"[{this.Script.Codes[line].SourceLine}] -> {dbValue2}>{dbValue3}?");
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, dbValue2 > dbValue3 ? 1.0 : 0);
                             line++; break;
                         case SirCodeInstructionTypes.Small:
-                            SetValue(code.Exp1, GetValue(code.Exp2).GetDouble() < GetValue(code.Exp3).GetDouble() ? 1.0 : 0);
+                            this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Variables[code.Exp2].MemoryPtr.GetDouble() < this.Variables[code.Exp2].MemoryPtr.GetDouble() ? 1.0 : 0);
                             line++; break;
                         // 七、区域操作指令
                         case SirCodeInstructionTypes.Jmp:
-                            if (code.Exp1.Type != SirExpressionTypes.Label) throw new SirException(code.SourceLine, line, $"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
-                            line = this.Labels[code.Exp1.Content].IntPtr;
+                            line = this.Labels[code.Exp1].IntPtr;
                             break;
                         case SirCodeInstructionTypes.Jmpf:
-                            if (code.Exp2.Type != SirExpressionTypes.Label) throw new SirException(code.SourceLine, line, $"不支持的表达式赋值类型'{code.Exp1.Type.ToString()}'");
-                            if (GetValue(code.Exp1).GetDouble() > 0) {
-                                line = this.Labels[code.Exp2.Content].IntPtr;
+                            int nValue1 = this.Variables[code.Exp1].MemoryPtr.GetInteger();
+                            if (nValue1 > 0) {
+                                //line = this.Labels[(int)this.Variables[code.Exp1].MemoryPtr.Content].IntPtr;
+                                line = this.Labels[code.Exp2].IntPtr;
                                 break;
                             }
                             line++; break;
                         case SirCodeInstructionTypes.Call:
-                            if (code.Exp2.Type == SirExpressionTypes.Label) {
-                                SetValue(code.Exp1, GetValue(ExecuteFunc(code.Exp2.Content)));
+                            var pf = this.Variables[code.Exp2].MemoryPtr;
+                            if (pf.Type == MemoryTypes.Function) {
+                                int retIndex = ExecuteFunc((int)this.Variables[code.Exp2].MemoryPtr.Content);
+                                if (retIndex > 0) this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, this.Variables[retIndex].MemoryPtr);
                             } else {
-                                string name = GetValue(code.Exp2).GetString();
+                                string name = this.Variables[code.Exp2].MemoryPtr.GetString();
                                 // 判断函数是否已经注册
                                 if (!this.RegisterFunctions.ContainsKey(name)) throw new SirException(code.SourceLine, line, $"未找到外部函数'{name}'");
                                 // 读取注册函数
                                 Sevm.MemoryPtr func = this.RegisterFunctions[name];
                                 if (func.Type == MemoryTypes.NativeFunction) {
                                     // 生成参数
-                                    Sevm.MemoryList arg = Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(this.Registers[0])).GetList(this.Memory);
+                                    Sevm.MemoryList arg = Sevm.MemoryPtr.CreateFromIntPtr(new IntPtr(this.Variables[1].MemoryPtr.GetLong())).GetList(this.Memory);
                                     Params args = new Params();
                                     for (int i = 0; i < arg.Count; i++) {
                                         args.Add(arg.GetItemContent(i));
@@ -526,7 +423,7 @@ namespace Sevm {
                                     try {
                                         int funcIdx = func.GetInteger();
                                         Sevm.MemoryPtr res = this.NativeFunctions[funcIdx](new NativeFunctionArgs(this.Memory, args));
-                                        SetValue(code.Exp1, res);
+                                        this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, res);
                                     } catch (Exception ex) {
                                         throw new SirException(SirExceptionTypes.General, code.SourceLine, line, $"外部函数'{name}'执行发生异常", ex);
                                     }
@@ -537,7 +434,7 @@ namespace Sevm {
                                     // 执行并返回内容
                                     using (var engine = new ScriptEngine(lib.Script, this.Root)) {
                                         Sevm.MemoryPtr res = engine.Execute(fnIndex, null, false);
-                                        SetValue(code.Exp1, res);
+                                        this.Memory.Set(this.Variables[code.Exp1].MemoryPtr, res);
                                     }
                                 } else {
                                     throw new SirException(code.SourceLine, line, $"函数'{name}'指针指向的内存不为函数");
@@ -548,7 +445,7 @@ namespace Sevm {
                         default: throw new SirException(code.SourceLine, line, $"不支持的指令类型'{code.Instruction.ToString()}'");
                     }
                 }
-                return SirExpression.Value(0);
+                return 0;
             } catch (Exception ex) {
                 throw new SirException(SirExceptionTypes.General, this.Script.Codes[line].SourceLine, line, $"指令执行'{this.Script.Codes[line].ToString().Trim()}'发生异常", ex);
             }
@@ -558,6 +455,9 @@ namespace Sevm {
         private void ExecuteInit(Params args, bool clear) {
             // 初始化
             this.Variables.Clear();
+            for (int i = 1; i <= 10; i++) {
+                this.Variables[i] = new ScriptVariable(SirScopeTypes.Private, "", new MemoryPtr() { Type = MemoryTypes.Value });
+            }
             this.Labels.Clear();
             // 初始化存储空间
             if (clear) {
@@ -696,13 +596,11 @@ namespace Sevm {
             for (int i = 0; i < this.Script.Codes.Count; i++) {
                 var code = this.Script.Codes[i];
                 if (code.Instruction == SirCodeInstructionTypes.Label) {
-                    if (code.Exp1.Type == SirExpressionTypes.Label) {
-                        int labIndex = code.Exp1.Content;
-                        if (this.Labels[labIndex] != null) {
-                            this.Labels[labIndex].IntPtr = i;
-                        } else {
-                            this.Labels[labIndex] = new ScriptLabel(SirScopeTypes.Private, "", i);
-                        }
+                    //int labIndex = (int)this.Variables[code.Exp1].MemoryPtr.Content;
+                    if (this.Labels.ContainsKey(code.Exp1)) {
+                        this.Labels[code.Exp1].IntPtr = i;
+                    } else {
+                        this.Labels[code.Exp1] = new ScriptLabel(SirScopeTypes.Private, "", i);
                     }
                 }
             }
@@ -729,7 +627,8 @@ namespace Sevm {
             // 执行初始化
             ExecuteInit(args, clear);
             // 执行函数
-            return GetValue(ExecuteFunc(func));
+            int res = ExecuteFunc(func);
+            return res > 0 ? this.Variables[res].MemoryPtr : Sevm.MemoryPtr.None;
         }
 
         /// <summary>
@@ -746,7 +645,7 @@ namespace Sevm {
             // 执行函数
             int idx = GetPublicLabelIndex(func);
             if (idx < 0) throw new SirException($"函数'{func}'入口缺失");
-            return GetValue(ExecuteFunc(idx));
+            return ExecuteFunc(idx);
         }
 
         /// <summary>
